@@ -3,11 +3,13 @@ const app = express();
 const routes = require('./routes');
 const bodyParser = require('body-parser');
 
-const cores = require('cors');
+// const cores = require('cors');
+// app.use(cores);
+
+
 //serving static files from public folder
 app.use(express.static('public'));
 
-app.use(cores);
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
