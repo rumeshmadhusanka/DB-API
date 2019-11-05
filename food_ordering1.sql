@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 05, 2019 at 11:40 AM
+-- Generation Time: Nov 05, 2019 at 08:15 PM
 -- Server version: 10.1.37-MariaDB
 -- PHP Version: 7.3.1
 
@@ -43,7 +43,8 @@ CREATE TABLE `customer` (
 
 INSERT INTO `customer` (`id`, `first_name`, `last_name`, `email`, `contact_no`, `password`) VALUES
 (1, 'Kamal', 'Fernando', 'kamal@gmail.com', '0786564786', 'fdty'),
-(2, 'Nimal', 'Soyza', 'nimal@gmail.com', '0896574567', 'bucguydu');
+(2, 'Nimal', 'Soyza', 'nimal@gmail.com', '0896574567', 'bucguydu'),
+(6, 'Amal', 'Rathnayake', 'amal@gmail.com', '0786567654', 'uvh dvfvrtgbtgbhtbb hdbhb f');
 
 -- --------------------------------------------------------
 
@@ -64,10 +65,11 @@ CREATE TABLE `item` (
 --
 
 INSERT INTO `item` (`id`, `name`, `description`, `price`, `photo`) VALUES
-(1, 'pancake', 'hvuyhef   uyfbvurbe uybyvu rhefybr fy7br fy', 100, ''),
-(2, 'devilled chicken pizza', 'y8g b uygcrvye  b cy7ber b cybb c', 700, ''),
-(3, 'lava cake', 'hguv  vvre y vryb v rybeyb rhube  hbuhv \r\nubvuyer y rvbreh vbrbv\r\n\r\nuivb', 200, ''),
-(4, 'chilli chicken pizza', 'ugyu fb er fb rhf u rbfuy', 1000, '');
+(1, 'pancake', 'hvuyhef   uyfbvurbe uybyvu rhefybr fy7br fy', 100, '1572980959620_pan cake.jpeg'),
+(2, 'devilled chicken pizza', 'y8g b uygcrvye  b cy7ber b cybb c', 700, '1572980924637_devilled chi.jpg'),
+(3, 'lava cake', 'hguv  vvre y vryb v rybeyb rhube  hbuhv \r\nubvuyer y rvbreh vbrbv\r\n\r\nuivb', 200, '1572980959618_lava.jpeg'),
+(4, 'chilli chicken pizza', 'ugyu fb er fb rhf u rbfuy', 1000, '1572980924634_chilli chicken.jpeg'),
+(5, 'french fries', 'Delicious french fries', 200, '1572980924638_fries.jpg');
 
 -- --------------------------------------------------------
 
@@ -180,13 +182,13 @@ ALTER TABLE `shop`
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `item`
 --
 ALTER TABLE `item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `orders`
