@@ -4,8 +4,12 @@ const routes = require('./routes');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-// const cores = require('cors');
-// app.use(cores);
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader("Access-Control-Allow-Credentials", true);
+    next();
+});
 
 
 //serving static files from public folder
