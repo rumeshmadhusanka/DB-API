@@ -8,6 +8,8 @@ const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../env.con
 let json_response = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../response_format.json"), 'utf8'));
 
 router.post('/register', (req, res) => {
+    json_response['data'] = [];
+
     let email = req.body.email
     let password = req.body.password
     let role = req.body.role
@@ -19,14 +21,12 @@ router.post('/register', (req, res) => {
             console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            json_response['data'] = []
             json_response['token'] = ''
             res.json(json_response);
         }
         else {
             shopId = results.insertId
             let token = jwt.sign({ shopId: shopId }, config.secret, config.optons)
-            json_response['data'] = []
             json_response['data'].push({ shopId: shopId })
             json_response['token'] = token
             res.json(json_response);
@@ -35,6 +35,8 @@ router.post('/register', (req, res) => {
 })
 
 router.post('/login', (req, res) => {
+    json_response['data'] = [];
+
     let email = req.body.email
     let password = req.body.password
 
@@ -44,7 +46,6 @@ router.post('/login', (req, res) => {
             console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error || "Email not found";
-            json_response['data'] = []
             json_response['token'] = ''
             res.json(json_response);
         }
@@ -55,13 +56,11 @@ router.post('/login', (req, res) => {
             if (!isPasswordValid) {
                 json_response['success'] = false;
                 json_response['message'] = "Incorrect password";
-                json_response['data'] = []
                 json_response['token'] = ''
                 return res.json(json_response);
             }
             let shopId = results[0].id
             let token = jwt.sign({shopId: shopId}, config.secret, config.options)
-            json_response['data'] = []
             json_response['data'].push({ customerId: shopId })
             json_response['token'] = token
             res.json(json_response);

@@ -2,10 +2,14 @@ const fs = require("fs");
 const router = require("express").Router();
 const connection = require("../../db");
 const path = require('path');
+const auth = require('../../middleware/auth')
 let json_response = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../response_format.json"), 'utf8'));
 
 // Get route to get all orders
-router.get('/', (req, res) => {
+router.get('/', auth.verifyUser, auth.isShop, (req, res) => {
+    json_response['data'] = [];
+    json_response['token'] = req.headers['x-access-token']
+
     let query = "select * from orders order by date_time desc"
 
     connection.query(query, (error, results) => {
@@ -13,11 +17,9 @@ router.get('/', (req, res) => {
             console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            json_response['data'] = [];
             res.json(json_response);
         }
         else {
-            json_response['data']=[]
             for (let i = 0; i < results.length; i++) {
                 json_response['data'].push(results[i]);
             }
@@ -27,7 +29,10 @@ router.get('/', (req, res) => {
 });
 
 // Post route to start a new order
-router.post('/', (req, res) => {
+router.post('/', auth.verifyUser, auth.isCustomer, (req, res) => {
+    json_response['data'] = [];
+    json_response['token'] = req.headers['x-access-token']
+
     let customerId = req.body.customerId
     let items = req.body.items
     let params = []
@@ -36,7 +41,6 @@ router.post('/', (req, res) => {
             console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            json_response['data'] = [];
             res.json(json_response);
         }
         else {
@@ -45,7 +49,6 @@ router.post('/', (req, res) => {
                     console.error("error: ", error);
                     json_response['success'] = false;
                     json_response['message'] = error;
-                    json_response['data'] = [];
                     res.json(json_response);
                 }
                 else {
@@ -60,7 +63,6 @@ router.post('/', (req, res) => {
                                 console.error("error: ", error);
                                 json_response['success'] = false;
                                 json_response['message'] = error;
-                                json_response['data'] = [];
                                 res.json(json_response);
                             }
                             else {
@@ -71,7 +73,6 @@ router.post('/', (req, res) => {
                                             console.error("error: ", error);
                                             json_response['success'] = false;
                                             json_response['message'] = error;
-                                            json_response['data'] = [];
                                             res.json(json_response);
                                         }
                                         else {
@@ -89,7 +90,10 @@ router.post('/', (req, res) => {
 })
 
 //Get route to get an order by id
-router.get('/:id', (req, res) => {
+router.get('/:id', auth.verifyUser, auth.checkAccessToOrder, (req, res) => {
+    json_response['data'] = [];
+    json_response['token'] = req.headers['x-access-token']
+
     let orderId = req.params.id
 
     query = "select * from order_details \
@@ -103,7 +107,6 @@ router.get('/:id', (req, res) => {
             console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            json_response['data'] = [];
             res.json(json_response);
         }
         else {
@@ -127,7 +130,6 @@ router.get('/:id', (req, res) => {
 
                 order.items.push(item)
             }
-            json_response['data']=[]
             json_response.data.push(order)
             res.json(json_response)
         }
@@ -135,7 +137,10 @@ router.get('/:id', (req, res) => {
 })
 
 // Put route to change order status from ongoing to complete
-router.put('/:id', (req, res) => {
+router.put('/:id', auth.verifyUser, auth.isShop, (req, res) => {
+    json_response['data'] = [];
+    json_response['token'] = req.headers['x-access-token']
+
     let orderId = req.params.id
     let query = "update orders set status='COMPLETED' where id=?"
     connection.query(query, orderId, (error, results) => {
@@ -143,7 +148,6 @@ router.put('/:id', (req, res) => {
             console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            json_response['data'] = [];
             res.json(json_response);
         }
         else {
