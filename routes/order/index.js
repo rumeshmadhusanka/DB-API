@@ -4,6 +4,7 @@ const connection = require("../../db");
 const path = require('path');
 let json_response = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../response_format.json"), 'utf8'));
 
+// Get route to get all orders
 router.get('/', (req, res) => {
     let query = "select * from orders order by date_time desc"
 
@@ -16,6 +17,7 @@ router.get('/', (req, res) => {
             res.json(json_response);
         }
         else {
+            json_response['data']=[]
             for (let i = 0; i < results.length; i++) {
                 json_response['data'].push(results[i]);
             }
@@ -24,6 +26,7 @@ router.get('/', (req, res) => {
     })
 });
 
+// Post route to start a new order
 router.post('/', (req, res) => {
     let customerId = req.body.customerId
     let items = req.body.items
@@ -85,6 +88,7 @@ router.post('/', (req, res) => {
     })
 })
 
+//Get route to get an order by id
 router.get('/:id', (req, res) => {
     let orderId = req.params.id
 
@@ -123,13 +127,14 @@ router.get('/:id', (req, res) => {
 
                 order.items.push(item)
             }
-
+            json_response['data']=[]
             json_response.data.push(order)
             res.json(json_response)
         }
     })
 })
 
+// Put route to change order status from ongoing to complete
 router.put('/:id', (req, res) => {
     let orderId = req.params.id
     let query = "update orders set status='COMPLETED' where id=?"
@@ -146,5 +151,35 @@ router.put('/:id', (req, res) => {
         }
     })
 })
+
+// router.get("/status/:status", (req, res) => {
+//     let orderStatus = req.params.status
+//     let query = "select * from orders where status=? order by date_time desc"
+    
+//     //need to add a transaction
+//     connection.query(query, orderStatus, (error, results) => {
+//         if (error) {
+//             console.error("error: ", error);
+//             json_response['success'] = false;
+//             json_response['message'] = error;
+//             json_response['data'] = [];
+//             res.json(json_response);
+//         }
+//         else {
+//             for (let i = 0; i < results.length; i++) {
+//                 json_response['data'].push(results[i]);
+
+//                 let orderId= results[i].id
+//                 query = "update orders set status='ONGOING' where id=? and status='NEW'"
+//                 connection.query(query, orderId, (error, result) =>{
+//                     if (error){
+//                         console.error("error: ", error);
+//                     }
+//                 })
+//             }
+//             res.json(json_response);
+//         }
+//     })
+// })
 
 module.exports = router;
