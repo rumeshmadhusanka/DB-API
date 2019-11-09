@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StrartPage</title>
+    <title>Dominos Login</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="./css/login.css">
 </head>
@@ -28,7 +28,7 @@
                     <label for="inputPassword">Password</label>
                     <div class="line"></div>
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button style="height: 50px;" type="submit" class="btn btn-primary">Login</button>
                 <!--<center>-->
                     <!--<div style="align-content: center;margin: 10px;">-->
                         <!--<label style="color: #2f2f2f; margin: auto; margin-left: 50px;">Don't have an account?<a href="" style="color: mediumblue;">Signup</a></label>-->
@@ -44,5 +44,26 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+    function checkValue(element) {
+        // check if the input has any value (if we've typed into it)
+        if ($(element).val())
+            $(element).addClass('has-value');
+        else
+            $(element).removeClass('has-value');
+    }
+
+    $(document).ready(function() {
+        // Run on page load
+        $('.form-control').each(function() {
+            checkValue(this);
+        })
+        // Run on input exit
+        $('.form-control').blur(function() {
+            checkValue(this);
+        });
+
+    });
+</script>
 </body>
 </html>
