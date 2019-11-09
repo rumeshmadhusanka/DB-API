@@ -1,6 +1,7 @@
 const fs = require("fs");
 const router = require("express").Router();
 const connection = require("../../db");
+const auth = require('../../middleware/auth')
 const path = require('path');
 const multer = require('multer');
 let json_response = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../response_format.json"), 'utf8'));
