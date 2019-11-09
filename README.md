@@ -1,5 +1,5 @@
 # Software Engineering Project Back-end API
-[![Build Status](https://travis-ci.org/rumeshmadhusanka/SE.svg?branch=master)](https://travis-ci.org/rumeshmadhusanka/SE)
+
 ###Deployment 
 https://software-engi.herokuapp.com/
 
