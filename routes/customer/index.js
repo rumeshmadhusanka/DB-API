@@ -1,7 +1,6 @@
 const fs = require("fs");
 const router = require("express").Router();
 const connection = require("../../db");
-const auth = require('../../middleware/auth')
 const path = require('path');
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
@@ -146,7 +145,7 @@ router.put('/:id', auth.verifyUser, auth.isSameUser, (req, res) => {
         })
 });
 
-router.delete('/:id', auth.verifyUser, auth.isSameUser, (req, res) => {
+router.delete('/:id', ath.verifyUser, auth.isSameUser, (req, res) => {
     json_response['data'] = [];
     json_response['token'] = req.headers['x-access-token']
 

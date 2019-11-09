@@ -1,7 +1,6 @@
 const fs = require("fs");
 const router = require("express").Router();
 const connection = require("../../db");
-const auth = require('../../middleware/auth')
 const path = require('path');
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')

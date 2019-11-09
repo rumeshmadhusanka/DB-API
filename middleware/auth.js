@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require('path');
 const jwt = require('jsonwebtoken')
-const connection = require("../db");
+const connection = require("../../db");
 const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../env.config.json"), 'utf8'));
 let json_response = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../response_format.json"), 'utf8'));
 
