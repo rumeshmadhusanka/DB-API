@@ -1,0 +1,211 @@
+body{
+    background: white;
+    margin: 0;
+    padding: 0;
+}
+.box{
+    margin-top: 200px;
+}
+.button{
+    width: 200px;
+    margin: 10px;
+}
+
+/*/////////////////////////////*/
+/*This was all taken from https://tympanus.net/Development/ButtonStylesInspiration/ but I needed to see it in CodePen
+*/
+@import url(https://fonts.googleapis.com/css?family=Raleway:200,300,400,500,600);
+@font-face {
+    font-weight: normal;
+    font-style: normal;
+    font-family: 'codropsicons';
+
+
+}
+*,
+*:after,
+*:before {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.cf:before,
+.cf:after {
+    content: '';
+    display: table;
+}
+.cf:after {
+    clear: both;
+}
+body {
+    background: white;
+    color: #37474f;
+    font-weight: 500;
+    font-size: 1em;
+    font-family: 'Raleway', Arial, sans-serif;
+}
+
+a {
+    color: #111000;
+    text-decoration: none;
+    outline: none;
+}
+a:hover,
+a:focus {
+    color: #111000;
+}
+.hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+.container {
+    margin: 0 auto;
+    text-align: center;
+    overflow: hidden;
+}
+.content {
+    padding: 0;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.content h2 {
+    margin: 0;
+}
+.content p {
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+}
+.box {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: center;
+    justify-content: center;
+}
+
+
+
+
+@media screen and (max-width:50em) {
+    .codrops-header {
+        padding: 3em 10% 4em;
+    }
+}
+@media screen and (max-width:50em) {
+    .codrops-header h1 {
+        font-size: 2.8em;
+    }
+}
+
+.bg-3 {
+    background: white;
+    color: black;
+}
+
+/* Common button styles */
+.button {
+    font-family: "Times New Roman";
+    float: left;
+    min-width: 500px;
+    max-width: 500px;
+    height: 70px;
+    display: block;
+    margin: 10px;
+    padding: 0;
+    border: none;
+    background: white;
+    color: inherit;
+    vertical-align: middle;
+    position: relative;
+    z-index: 1;
+    -webkit-backface-visibility: hidden;
+    -moz-osx-font-smoothing: grayscale;
+}
+.button:focus {
+    outline: none;
+}
+.button > span {
+    vertical-align: middle;
+}
+
+.bg-3 .button {
+    color: #fff;
+    border-color: darkgrey;
+}
+
+
+
+/* Borders */
+.button--border-thin {
+    border: 1px solid;
+}
+
+/* Individual button styles */
+
+/* Winona */
+.button--winona {
+    overflow: hidden;
+    padding: 0;
+    -webkit-transition: border-color 0.3s, background-color 0.3s;
+    transition: border-color 0.3s, background-color 0.3s;
+    -webkit-transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);
+    transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);
+}
+.button--winona::after {
+    content: attr(data-text);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    color: #111000;
+    -webkit-transform: translate3d(0, 25%, 0);
+    transform: translate3d(0, 25%, 0);
+}
+.button--winona > span {
+    display: block;
+}
+.button--winona.button--inverted {
+    color: #111000;
+}
+.button--winona.button--inverted:after {
+    color: black;
+}
+.button--winona::after,
+.button--winona > span {
+    padding: 0;
+    -webkit-transition: -webkit-transform 0.3s, opacity 0.3s;
+    transition: transform 0.3s, opacity 0.3s;
+    -webkit-transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);
+    transition-timing-function: cubic-bezier(0.2, 1, 0.3, 1);
+}
+.button--winona:hover {
+    border-color: #111000;
+    background-color: rgba(63, 81, 181, 0.1);
+}
+.button--winona.button--inverted:hover {
+    border-color: black;
+    background-color: white;
+}
+.button--winona:hover::after {
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+.button--winona:hover > span {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -25%, 0);
+    transform: translate3d(0, -25%, 0);
+}
+.button{
+    width: 100%;
+}
+
