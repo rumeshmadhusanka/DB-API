@@ -3,11 +3,14 @@ const router = require("express").Router();
 const connection = require("../../db");
 const path = require('path');
 const auth = require('../../middleware/auth')
-let json_response = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../response_format.json"), 'utf8'));
+let json_response_model = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../response_format.json"), 'utf8'));
 
 // Get route to get all orders
 router.get('/', auth.verifyUser, auth.isShop, (req, res) => {
-    json_response['data'] = [];
+    let json_response = Object.create(json_response_model)
+    json_response['success'] = true
+    json_response['message']= ''
+    json_response['data'] = []
     json_response['token'] = req.headers['x-access-token']
 
     let query = "select * from orders order by date_time desc"
@@ -17,31 +20,32 @@ router.get('/', auth.verifyUser, auth.isShop, (req, res) => {
             console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            res.json(json_response);
+            res.status(502).json(json_response);
         }
         else {
             for (let i = 0; i < results.length; i++) {
                 json_response['data'].push(results[i]);
             }
-            res.json(json_response);
+            res.status(200).json(json_response);
         }
     })
 });
 
 // Post route to start a new order
 router.post('/', auth.verifyUser, auth.isCustomer, (req, res) => {
-    json_response['data'] = [];
+    let json_response = Object.create(json_response_model)
+    json_response['success'] = true
+    json_response['message']= ''
+    json_response['data'] = []
     json_response['token'] = req.headers['x-access-token']
 
-    let customerId = req.body.customerId
+    let customerId = req.userId
     let items = req.body.items
-    let params = []
     connection.beginTransaction((error) => {
         if (error) {
-            console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            res.json(json_response);
+            res.status(501).json(json_response);
         }
         else {
             connection.query("INSERT INTO orders (customer_id) VALUES (?)", customerId, (error, results) => {
@@ -49,10 +53,12 @@ router.post('/', auth.verifyUser, auth.isCustomer, (req, res) => {
                     console.error("error: ", error);
                     json_response['success'] = false;
                     json_response['message'] = error;
-                    res.json(json_response);
+                    res.status(503).json(json_response);
                 }
                 else {
                     let orderId = results.insertId
+                    let errorCode;
+
                     for (let i = 0; i < items.length; i++) {
                         let query = "INSERT INTO order_details (order_id, item_id, quantity) VALUES (?, ?, ?);"
                         let itemId = items[i].itemId
@@ -60,23 +66,25 @@ router.post('/', auth.verifyUser, auth.isCustomer, (req, res) => {
 
                         connection.query(query, [orderId, itemId, itemQuantity], (error, results) => {
                             if (error) {
-                                console.error("error: ", error);
                                 json_response['success'] = false;
                                 json_response['message'] = error;
-                                res.json(json_response);
+                                errorCode = 400
                             }
                             else {
                                 if (i == items.length - 1) {
                                     connection.commit((error) => {
                                         if (error) {
                                             connection.rollback()
-                                            console.error("error: ", error);
                                             json_response['success'] = false;
                                             json_response['message'] = error;
-                                            res.json(json_response);
+                                            res.status(400).json(json_response);
+                                        }
+                                        else if(errorCode ===400){
+                                            connection.rollback()
+                                            res.status(400).json(json_response);
                                         }
                                         else {
-                                            res.redirect(`/order/${orderId}`)
+                                            res.status(302).redirect(`/order/${orderId}`)
                                         }
                                     })
                                 }
@@ -91,7 +99,10 @@ router.post('/', auth.verifyUser, auth.isCustomer, (req, res) => {
 
 //Get route to get an order by id
 router.get('/:id', auth.verifyUser, auth.checkAccessToOrder, (req, res) => {
-    json_response['data'] = [];
+    let json_response = Object.create(json_response_model)
+    json_response['success'] = true
+    json_response['message']= ''
+    json_response['data'] = []
     json_response['token'] = req.headers['x-access-token']
 
     let orderId = req.params.id
@@ -103,11 +114,16 @@ router.get('/:id', auth.verifyUser, auth.checkAccessToOrder, (req, res) => {
     where order_id=?;"
 
     connection.query(query, orderId, (error, results) => {
+
         if (error) {
-            console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            res.json(json_response);
+            res.status(503).json(json_response);
+        }
+        else if (results.length === 0) {
+            json_response['success'] = false;
+            json_response['message'] = "No order found";
+            res.status(400).json(json_response);
         }
         else {
             let order = {}
@@ -130,28 +146,35 @@ router.get('/:id', auth.verifyUser, auth.checkAccessToOrder, (req, res) => {
 
                 order.items.push(item)
             }
-            json_response.data.push(order)
-            res.json(json_response)
+            json_response['data'].push(order)
+            res.status(200).json(json_response)
         }
     })
 })
 
 // Put route to change order status from ongoing to complete
 router.put('/:id', auth.verifyUser, auth.isShop, (req, res) => {
-    json_response['data'] = [];
+    let json_response = Object.create(json_response_model)
+    json_response['success'] = true
+    json_response['message']= ''
+    json_response['data'] = []
     json_response['token'] = req.headers['x-access-token']
 
     let orderId = req.params.id
-    let query = "update orders set status='COMPLETED' where id=?"
+    let query = "update orders set status='COMPLETED' where id=? and (status='ONGOING' or status='NEW')"
     connection.query(query, orderId, (error, results) => {
         if (error) {
-            console.error("error: ", error);
             json_response['success'] = false;
             json_response['message'] = error;
-            res.json(json_response);
+            res.status(501).json(json_response);
+        }
+        else if (results.affectedRows === 0) {
+            json_response['success'] = false;
+            json_response['message'] = "No order for the id";
+            res.status(400).json(json_response);
         }
         else {
-            res.redirect(`/order/${orderId}`)
+            res.status(302).redirect(`/order/${orderId}`)
         }
     })
 })
@@ -159,7 +182,7 @@ router.put('/:id', auth.verifyUser, auth.isShop, (req, res) => {
 // router.get("/status/:status", (req, res) => {
 //     let orderStatus = req.params.status
 //     let query = "select * from orders where status=? order by date_time desc"
-    
+
 //     //need to add a transaction
 //     connection.query(query, orderStatus, (error, results) => {
 //         if (error) {

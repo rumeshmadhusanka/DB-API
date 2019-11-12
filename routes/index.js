@@ -7,3 +7,4 @@ module.exports = function (app) {
         res.json({"message": "Welcome to the API"})
     });
 };
+

@@ -85,6 +85,7 @@ router.get('/:id', auth.verifyUser, auth.isSameUser, (req, res) => {
             } else {
                 //console.log(results);
                 results = results[0];
+                console.log(results['id'])
                 data['id'] = results['id'];
                 data['first_name'] = results['first_name'];
                 data['last_name'] = results['last_name'];
