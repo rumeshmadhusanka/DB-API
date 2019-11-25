@@ -31,7 +31,9 @@ router.post('/register', (req, res) => {
             customerId = results.insertId
             let token = jwt.sign({ customerId: customerId }, config.secret, config.optons)
             json_response['data'].push({ customerId: customerId })
-            json_response['token'] = token
+            json_response['token'] = token;
+            json_response['success'] = true;
+            json_response['message'] = "Sign in success";
             res.json(json_response);
         }
     })
@@ -63,6 +65,8 @@ router.post('/login', (req, res) => {
             let customerId = results[0].id
             let token = jwt.sign({customerId: customerId}, config.secret, config.options)
             json_response['data'].push({ customerId: customerId })
+            json_response['success'] = true;
+            json_response['message'] = "login success";
             json_response['token'] = token
             res.json(json_response);
         }
