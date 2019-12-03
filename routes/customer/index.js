@@ -26,8 +26,8 @@ router.post('/register', (req, res) => {
             json_response['message'] = error;
             json_response['token'] = ''
             res.json(json_response);
-        }
-        else {
+        } else {
+            x - access - token
             customerId = results.insertId
             let token = jwt.sign({ customerId: customerId }, config.secret, config.optons)
             json_response['data'].push({ customerId: customerId })
