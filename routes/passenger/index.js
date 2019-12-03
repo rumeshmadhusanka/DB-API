@@ -1,11 +1,12 @@
-let json_response_model = require('../../json_response');
+let json_response_model = require('../../json_response');  //A function returns an object
 const router = require("express").Router();
-let Passenger = require("../../classes/Passenger");
+let passenger = require("../../classes/Passenger");
 
 router.get('/:id', (req, res) => {
-    let p = new Passenger();
-    console.log(p);
-    res.json(JSON.stringify(p));
+    let p = passenger();
+    let resp = json_response_model(); //returns a new object
+    resp.data.push(p);
+    res.json(resp);
 });
 
 module.exports = router;
