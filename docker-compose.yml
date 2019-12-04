@@ -1,0 +1,14 @@
+version: "3"
+services:
+  app:
+    image: node:alpine
+    volumes:
+      - ./:/app
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+      - 3306:3306
+    command: npm run dev
+    network_mode: "host"
