@@ -12,16 +12,24 @@ router.get('/:id', (req, res) => {
         if (error) {
             json_response.success = false;
             json_response.message = "Internal server error";
-            console.log(error);
             logger.log(error);
             res.status(502).json(json_response);
-        } else if (results == null) {
+        } else if (!results.length) {
             json_response.success = false;
             json_response.message = "No user found";
             res.status(404).json(json_response);
         } else {
             json_response.success = true;
-            json_response.message = "";
+            json_response.message = "Success";
+            let person = {};
+            results = results[0];
+            person['user_id'] = results['user_id'];
+            person['first_name'] = results['first_names'];
+            person['email'] = results['email'];
+            person['nic'] = results['nic'];
+            person['passport_id'] = results['passport_id'];
+            json_response.data.push(person);
+            console.log(results);
             res.status(200).json(json_response);
         }
 
