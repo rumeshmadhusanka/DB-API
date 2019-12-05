@@ -41,6 +41,55 @@ router.get('/:id', (req, res) => {
 
 //Sign in route
 router.post('/', (req, res) => {
+    let first_names = req.body.first_names;
+    let second_name = req.body.second_name;
+    let email = req.body.email;
+    let nic = req.body.nic;
+    let passport_id = req.body.passport_id;
+    let username = req.body.username;
+    let password = req.body.password;
+    let query =
+        " insert into user(first_names, second_name, email, nic, passport_id) VALUES (?,?,?,?,?);" +
+        "insert into registered_user(username, password) values(?,?);";
+    let json_response = json_response_model();
+    connection.beginTransaction((err) => {
+        if (err) {
+            connection.rollback();
+            json_response.success = false;
+            json_response.message = "Internal server error";
+            logger.log(err);
+            console.log(err);
+            res.status(502).json(json_response);
+        } else {
+            connection.query(query, [first_names, second_name, email, nic, passport_id, username, password], function (err, results) {
+                if (err) {
+                    connection.rollback();
+                    json_response.success = false;
+                    json_response.message = "Invalid credentials";
+                    logger.log(err);
+                    console.log(err);
+                    res.status(400).json(json_response);
+                } else {
+                    connection.commit(function (err) {
+                        if (err) {
+                            connection.rollback();
+                            json_response.success = false;
+                            json_response.message = "Internal server error";
+                            logger.log(err);
+                            console.log(err);
+                            res.status(502).json(json_response);
+                        } else {
+                            //res.send
+                            json_response.success = true;
+                            json_response.message = "Success";
+                            res.status(200).json(json_response);
+                        }
+                    })
+                }
+            })
+        }
+    })
+
 
 });
 

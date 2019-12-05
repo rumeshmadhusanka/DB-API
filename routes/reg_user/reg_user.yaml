@@ -9,13 +9,19 @@ host: localhost:3000
 schemes:
   - http
 tags:
-  - name: Users
+  - name: User
     description: User management
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://example.com/oauth/authorize
+    tokenUrl: https://example.com/oauth/token
 paths:
   /reg_user/{user_id}:
     get:
       tags:
-        - Users
+        - User
       summary: Get info by user id
       parameters:
         - name: user_id
@@ -28,15 +34,43 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user_id:
+                      type: number
+                    first_names:
+                      type: string
+                    second_name:
+                      type: string
+                    email:
+                      type: string
+                    nic:
+                      type: string
+                    passport_id:
+                      type: string
+                    username:
+                      type: string
+              token:
+                type: string
         404:
-          description: User not found
+          description: Not found
         401:
           description: Unauthorized
         502:
           description: Server Error
     put:
       tags:
-        - Users
+        - User
       summary: Update user
       produces:
         - application/json
@@ -49,7 +83,7 @@ paths:
           description: Bad request
     delete:
       tags:
-        - Users
+        - User
       produces:
         - application/json
       summary: Delete a user
@@ -64,32 +98,52 @@ paths:
   /reg_user/:
     post:
       tags:
-        - Users
+        - User
       parameters:
-        - name: first_names
-          in: body
-          description: first name
+        - in: body
+          name: user
+          description: users details
           schema:
-            type: string
-        - name: second_name
-          in: body
-          schema:
-            type: string
+            type: object
+            required:
+              - first_names
+              - second_name
+              - email
+              - nic
+              - passport_id
+              - username
+              - password
+            properties:
+              first_names:
+                type: string
+              second_name:
+                type: string
+              email:
+                type: string
+              nic:
+                type: string
+              passport_id:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+
       produces:
         - application/json
       summary: Create a new User
       responses:
-        200:
-          description: OK
-        404:
-          description: User not Found
+        201:
+          description: Created
         400:
           description: Bad request
+        502:
+          description: Server Error
 
   /reg_user/{user_id}/booking:
     get:
       tags:
-        - Users
+        - User
       summary: Get all the bookings by the customer
       produces:
         - application/json
@@ -103,12 +157,11 @@ paths:
           description: OK
         404:
           description: Not found
-        400:
-          description: Bad request
-
+        502:
+          description: Server Error
     post:
       tags:
-        - Users
+        - User
       summary: Create a new booking
       produces:
         - application/json
@@ -118,12 +171,14 @@ paths:
           type: integer
           required: true
       responses:
-        200:
-          description: OK
+        201:
+          description: Created
         404:
           description: Not found
         400:
           description: Bad request
+        502:
+          description: Server Error
 
 
 

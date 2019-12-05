@@ -1,0 +1,28 @@
+swagger: "2.0"
+tags:
+  - name: Airport
+    description: Airport management
+
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+paths:
+  /airport/{airport_id}:
+    get:
+      tags:
+        - Airport
+      parameters:
+        - name: airport_id
+          in: path
+          type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+            
