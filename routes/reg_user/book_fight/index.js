@@ -15,7 +15,7 @@ router.get('/all', (req, res) => {
             console.log(error);
             logger.log(error);
             res.status(502).json(json_response);
-        } else if (results == null) {
+        } else if (typeof(results.lenght) == "undefined") {
             json_response.success = false;
             json_response.message = "No fight found";
             res.status(404).json(json_response);
