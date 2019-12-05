@@ -22,6 +22,7 @@ router.get('/:id', (req, res) => {
         } else {
             json_response.success = true;
             json_response.message = "";
+            json_response.data=results;
             res.status(200).json(json_response);
         }
 
