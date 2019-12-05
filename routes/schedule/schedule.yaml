@@ -1,0 +1,68 @@
+swagger: "2.0"
+tags:
+  - name: Schedule
+    description: Schedule management
+
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+paths:
+  /schedule:
+    get:
+      tags:
+        - Schedule
+      summary: Get all the schedules
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        404:
+          description: User not found
+        401:
+          description: Unauthorized
+        502:
+          description: Server Error
+    post:
+      tags:
+        - Schedule
+      summary: Create a new schedule
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        404:
+          description: User not found
+        401:
+          description: Unauthorized
+        502:
+          description: Server Error
+  /schedule/{date}:
+    get:
+      tags:
+        - Schedule
+      summary: Get the schedule for a given date
+      parameters:
+        - name: date
+          in: path
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        404:
+          description: User not found
+        401:
+          description: Unauthorized
+        502:
+          description: Server Error
+

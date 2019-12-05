@@ -1,0 +1,131 @@
+swagger: "2.0"
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+tags:
+  - name: Users
+    description: User management
+paths:
+  /reg_user/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: Get info by user id
+      parameters:
+        - name: user_id
+          in: path
+          description: user id
+          type: integer
+          required: true
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        404:
+          description: User not found
+        401:
+          description: Unauthorized
+        502:
+          description: Server Error
+    put:
+      tags:
+        - Users
+      summary: Update user
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        404:
+          description: User not Found
+        400:
+          description: Bad request
+    delete:
+      tags:
+        - Users
+      produces:
+        - application/json
+      summary: Delete a user
+      responses:
+        200:
+          description: OK
+        404:
+          description: User not Found
+        400:
+          description: Bad request
+
+  /reg_user/:
+    post:
+      tags:
+        - Users
+      parameters:
+        - name: first_names
+          in: body
+          description: first name
+          schema:
+            type: string
+        - name: second_name
+          in: body
+          schema:
+            type: string
+      produces:
+        - application/json
+      summary: Create a new User
+      responses:
+        200:
+          description: OK
+        404:
+          description: User not Found
+        400:
+          description: Bad request
+
+  /reg_user/{user_id}/booking:
+    get:
+      tags:
+        - Users
+      summary: Get all the bookings by the customer
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: path
+          type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not found
+        400:
+          description: Bad request
+
+    post:
+      tags:
+        - Users
+      summary: Create a new booking
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: path
+          type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not found
+        400:
+          description: Bad request
+
+
+
+
+

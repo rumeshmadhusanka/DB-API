@@ -3,6 +3,29 @@ const app = express();
 const routes = require('./routes');
 const bodyParser = require('body-parser');
 const path = require('path');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: 'Airline API',
+            description: "https://github.com/rumeshmadhusanka/DB-API",
+            contact: {
+                name: 'https://github.com/rumeshmadhusanka/DB-API'
+            },
+            host: 'http://localhost:3000',
+            basePath: '/'
+        }
+    },
+    apis: ['./routes/**/**.yaml']
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
