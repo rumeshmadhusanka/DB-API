@@ -9,7 +9,7 @@ router.get('/all', (req, res) => {
     let query = "SELECT * from schedule WHERE `date`> CURDATE()";
     connection.query(query,(error, results) => {
         let json_response = json_response_model();//returns a new object
-        console.log(typeof(results.lenght));
+        // console.log(typeof(results.lenght));
         if (error) {
             json_response.success = false;
             json_response.message = "Internal server error";
