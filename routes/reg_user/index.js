@@ -31,7 +31,6 @@ router.get('/:id', (req, res) => {
 
 
 });
-
 //Sign in route
 router.post('/', (req, res) => {
 
