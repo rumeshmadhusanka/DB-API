@@ -1,0 +1,9 @@
+apps:
+  - script: ./index.js
+    name: db-backend
+    instances: max
+    exec_mode: cluster
+    env:
+      NODE_ENV: development
+    env_production:
+      NODE_EV: production
