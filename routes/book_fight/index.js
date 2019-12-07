@@ -53,8 +53,7 @@ router.get('/:id', (req, res) => {
         } else {
             json_response.success = true;
             json_response.message = "";
-            json_response.data=results;
-            // console.log(typeof(results[0]));    
+            json_response.data=results; 
             res.status(200).json(json_response);
         }
     })
@@ -63,5 +62,31 @@ router.get('/:id', (req, res) => {
         json_response.message = "Bad request";
         res.status(400).json(json_response);
     }
+    });
+
+    router.post('/:id',(req,res)=>{ //autentification if register user
+        let id = req.params['id'];
+        let customerId = req.userId;
+        let schedule_id=req.body.schedule_id;
+        let seat_id=req.body.seat_id;
+        let user_id=req.body.user_id;
+        let json_response = json_response_model(); //Json response object created
+        connection.beginTransaction((error) => {
+            if(error){
+            json_response['success'] = false;
+            json_response['message'] = error;
+            res.status(501).json(json_response);
+            }else{
+                var todaydate = new Date().toISOString().slice(0,10);
+                let query="NSERT INTO `book` (`id`, `date`, `schedule_id`, `seat_id`, `user_id`) VALUES (NULL, ?, ?, ?,?)"
+                connection.query(query,null,todaydate,schedule_id,seat_id,user_id,(error,results)=>{
+                    if(error){
+                        
+                    }
+                });
+            
+            }
+        });
+
     });
 module.exports = router;
