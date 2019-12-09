@@ -73,7 +73,7 @@ router.get('/:id', (req, res) => {
         let seat_id=req.body.seat_id;
         let user_id=req.body.user_id;
         let json_response = json_response_model(); //Json response object created
-        console.log(id,schedule_id,seat_id,user_id);
+        // console.log(id,schedule_id,seat_id,user_id);
         connection.beginTransaction((error) => {
             if(error){
             json_response['success'] = false;
@@ -87,9 +87,16 @@ router.get('/:id', (req, res) => {
                     // console.log(todaydate);
                     // let error_code=200;
                     if(error){
-                        json_response['success'] = false;
-                        json_response['message'] = error;
-                        res.status(501).json(json_response);
+                        if(error.sqlState == 45000){
+                            error['sqlMessage']="Seat already booked"
+                            json_response['success'] = false;
+                            json_response['message'] = error['sqlMessage'];
+                            res.status(400).json(json_response);
+                        }else{
+                            json_response['success'] = false;
+                            json_response['message'] = error;
+                            res.status(501).json(json_response);
+                        }
                     }else{
                         let price_query="SELECT get_Total_price_with_discount("+user_id+","+seat_id+")"
                         connection.query(price_query,(error,result)=>{
