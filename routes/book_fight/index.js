@@ -78,7 +78,7 @@ router.get('/:id', (req, res) => {
             res.status(501).json(json_response);
             }else{
                 var todaydate = new Date().toISOString().slice(0,10);
-                let query="NSERT INTO `book` (`id`, `date`, `schedule_id`, `seat_id`, `user_id`) VALUES (NULL, ?, ?, ?,?)"
+                let query="INSERT INTO `book` (`id`, `date`, `schedule_id`, `seat_id`, `user_id`) VALUES (NULL, ?, ?, ?,?)"
                 connection.query(query,null,todaydate,schedule_id,seat_id,user_id,(error,results)=>{
                     if(error){
                         
