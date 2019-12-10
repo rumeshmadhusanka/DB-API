@@ -2,5 +2,6 @@
   "host": "localhost",
   "user": "root",
   "password": "",
-  "database": "airline"
+  "database": "airline",
+  "connectionLimit": 10
 }
