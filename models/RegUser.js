@@ -9,20 +9,6 @@ function RegUser() {
 RegUser.prototype.getUserById = async function (user_id) {
     let query1 = "select * from user inner join registered_user using(user_id) where user.user_id = ?";
     return new Promise((async (resolve, reject) => {
-        // pool.then((conn) => {
-        //     conn.query(query1, [user_id])
-        //         .then((results) => {
-        //             if (!results.length) {
-        //                 reject(new ErrorHandler(404, "No user found for id: " + user_id));
-        //             } else {
-        //                 resolve(results);
-        //             }
-        //         }).catch((error) => {
-        //         reject(new ErrorHandler(502, error));
-        //     });
-        // });
-
-
         try {
             let pool = await poolPromise;
             let result = await pool.query(query1, [user_id]);
