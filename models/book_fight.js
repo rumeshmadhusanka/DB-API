@@ -42,7 +42,6 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
 
     }));
 };
-
 book_fight.prototype.postbookfight = async function (schedule_id, seat_id,user_id) {
     let query1 = "INSERT INTO `book` ( `date`, `schedule_id`, `seat_id`, `user_id`) VALUES (?,?,?,?)";
     return new Promise(async (resolve, reject) => {
