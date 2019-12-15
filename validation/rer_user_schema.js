@@ -12,4 +12,4 @@ const id_schema=Joi.object().keys({
     id:Joi.number().integer().required()
 });
 
-module.exports={reg_user_schema,id_schema}
+module.exports={reg_user_schema,id_schema} 
