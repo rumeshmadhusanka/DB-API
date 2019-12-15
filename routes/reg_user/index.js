@@ -4,9 +4,10 @@ const path = require('path');
 const connection = require("../../db");
 const logger = require("../../logger");
 const RegUser = require('../../models/RegUser');
+const Joi_schema=require('../../validation/book_fight_schema'); 
 
 router.get('/:id', async (req, res) => {
-    let id = req.params['id'];
+    let id_params = {id:req.params['id']};
     //let query = "select * from user inner join registered_user using(user_id) where user.user_id = ?";
     // connection.query(query, [id], (error, results, fields) => {
     //     let json_response = json_response_model(); //returns a new object
@@ -41,7 +42,8 @@ router.get('/:id', async (req, res) => {
     let user = new RegUser();
     let json_response = json_response_model();
     try {
-        let results = await user.getUserById(id);
+        await Joi_schema.id_schema.validateAsync(id_params);
+        let results = await user.getUserById(id_params.id);
         //console.log(results);
         let person = {};
         let send_results = results[0];
@@ -49,17 +51,21 @@ router.get('/:id', async (req, res) => {
         json_response.data.push(send_results);
         res.status(200).json(json_response);
     } catch (e) {
-        console.log(e);
-        json_response.message = e;
-        let code = e.statusCode || 502;
-        res.status(code).json(json_response);
+        // console.log(e._message);
+        json_response.message =  e;
+        let code = e.statusCode || 502;  
+        if (e._message==null && e.details[0].message ){
+            code=400;
+            json_response.message =  e.details[0].message;
+            res.status(code).json(json_response);
+        }else{
+            res.status(code).json(json_response);
+        }  
     }
-
-
 });
 
 //Sign in route
-router.post('/', (req, res) => {
+router.post('/', async(req, res) => {
     let first_names = req.body.first_names;
     let second_name = req.body.second_name;
     let email = req.body.email;

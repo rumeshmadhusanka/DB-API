@@ -39,10 +39,15 @@ router.get('/:id', async(req, res) => {
             json_response.success = true;
             res.status(200).json(json_response);
         } catch (e) {
-            json_response.message = e.details[0].message  || e;
-            let code = e.statusCode || 502;
-            if (e.details[0].message){code=400;}
-            res.status(code).json(json_response);
+            json_response.message =  e;
+            let code = e.statusCode || 502;  
+            if (e._message==null && e.details[0].message ){
+                code=400;
+                json_response.message =  e.details[0].message;
+                res.status(code).json(json_response);
+            }else{
+                res.status(code).json(json_response);
+            }
         }
     }else{
         try {
@@ -55,10 +60,15 @@ router.get('/:id', async(req, res) => {
             json_response.message = "Seat cost sent";
             res.status(200).json(json_response);
         } catch (e) {
-            json_response.message = e.details[0].message  || e;
-            let code = e.statusCode || 502;
-            if (e.details[0].message){code=400;}
-            res.status(code).json(json_response);
+            json_response.message =  e;
+            let code = e.statusCode || 502;  
+            if (e._message==null && e.details[0].message ){
+                code=400;
+                json_response.message =  e.details[0].message;
+                res.status(code).json(json_response);
+            }else{
+                res.status(code).json(json_response);
+            }
         }
     }
 });
@@ -99,10 +109,15 @@ router.post('/:id',async(req,res)=>{
         json_response.message = "Successfully booked ";
         res.status(201).json(json_response);
     } catch (e) {
-        json_response.message = e.details[0].message  || e;
-        let code = e.statusCode || 502;
-        if (e.details[0].message){code=400;}
-        res.status(code).json(json_response);
+        json_response.message =  e;
+        let code = e.statusCode || 502;  
+        if (e._message==null && e.details[0].message ){
+            code=400;
+            json_response.message =  e.details[0].message;
+            res.status(code).json(json_response);
+        }else{
+            res.status(code).json(json_response);
+        }
     }
 });
 
@@ -121,10 +136,15 @@ router.delete('/:schedule_id',async(req,res)=>{
         json_response.message = "Successfully delet booked ";
         res.status(200).json(json_response);
     } catch (e) {
-        json_response.message = e.details[0].message  || e;
-        let code = e.statusCode || 502;
-        if (e.details[0].message){code=400;}
-        res.status(code).json(json_response);
+        json_response.message =  e;
+        let code = e.statusCode || 502;  
+        if (e._message==null && e.details[0].message ){
+            code=400;
+            json_response.message =  e.details[0].message;
+            res.status(code).json(json_response);
+        }else{
+            res.status(code).json(json_response);
+        }
     }
 });
 router.put('/',async(req,res)=>{

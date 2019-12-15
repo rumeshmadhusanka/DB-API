@@ -31,7 +31,7 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
             
             let result = await pool.query(query1,[schedule_id]);
             if (!result.length) {
-                reject(new ErrorHandler(404, "No fight found"));
+                reject(new ErrorHandler(404, "No fight with found shechdule id "+schedule_id));
             } else {
                 resolve(result);
             }
@@ -43,7 +43,7 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
     }));
 };
 book_fight.prototype.postbookfight = async function (schedule_id, seat_id,user_id) {
-    let query1 = "INSERT INTO `book` ( `date`, `schedule_id`, `seat_id`, `user_id`) VALUES (?,?,?,?)";
+    let query1 = "INSERT INTO `book` ( `date`, `schedule_id`, `seat_id`, `user_id`) VLUES (?,?,?,?)";
     return new Promise(async (resolve, reject) => {
         try {
             let pool = await poolPromise;
