@@ -66,7 +66,11 @@ book_fight.prototype.getpriceseat=async function(user_id,seat_id){
         try{
             let pool = await poolPromise;
             let result=await pool.query(price_query,[user_id,seat_id]);
-            resolve(result);
+            if(result[0][Object.keys(result[0])[0]]){
+                resolve(result);
+            }else{
+               reject(new ErrorHandler(404, "Seat not found"));
+            }
         }catch(e){
             logger.log(e);
             reject(new ErrorHandler(502, "Internal Server Error"));
