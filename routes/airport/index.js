@@ -19,12 +19,29 @@ router.get('/', async (req, res) => {
 
 });
 
-router.put('/',async(req,res)=>{
+router.post('/',async(req,res)=>{
     let airport_obj = new Airport();
+    let json_response = json_response_model();
     try {
-        // json_response.data=await 
-    } catch (error) {
-        
+        //validation required
+        let airport_req={location_id:req.body.location_id,
+                    name:req.body.name,
+                    code:req.body.code,
+        }
+        json_response.data=await airport_obj.addairport(airport_req);
+        json_response.success = true;
+        json_response.message = "Successfully added";
+        res.status(201).json(json_response);
+    } catch (e) {
+        json_response.message =  e;
+            let code = e.statusCode || 502;  
+            if (e._message==null && e.details[0].message ){
+                code=400;
+                json_response.message =  e.details[0].message;
+                res.status(code).json(json_response);
+            }else{
+                res.status(code).json(json_response);
+            }
     } 
 });
 

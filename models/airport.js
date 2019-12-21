@@ -22,10 +22,22 @@ Airport.prototype.getallairport= async function(){
         }
     });
 }
-Airport.prototype.addairport=async function(){
-    let query= "INSERT INTO `airport` (`airport_id`, `location_id`, `name`, `code`) VALUES (?,?,?,?);";
+Airport.prototype.addairport=async function(airport_req){
+    let query= "INSERT INTO `airport` (`location_id`, `name`, `code`) VALUES (?,?,?);";
     return new Promise(async(resolve,reject)=>{
-        
+        let pool = await poolPromise;
+        try {
+            let result = await pool.query(query,[airport_req.location_id,airport_req.name,airport_req.code]);
+            resolve(result);
+        } catch (e) {
+            if(e.sqlState==45000){
+                reject(new ErrorHandler(400, "Airport already added"));
+            }else{ 
+                logger.log(e);
+                // console.log(e);
+                reject(new ErrorHandler(502, "Internal Server Error"));
+            }
+        }
     });
 }
 module.exports=Airport;
