@@ -179,8 +179,3 @@ paths:
           description: Bad request
         502:
           description: Server Error
-
-
-
-
-

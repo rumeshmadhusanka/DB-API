@@ -65,4 +65,3 @@ paths:
           description: Unauthorized
         502:
           description: Server Error
-
