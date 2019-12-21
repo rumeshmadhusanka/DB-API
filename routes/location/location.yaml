@@ -1,0 +1,141 @@
+swagger: "2.0"
+tags:
+  - name: Location
+    description: Location
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+paths:
+  /location/:
+    get:
+      tags:
+        - Location
+      summary: Get all locations
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    location_id:
+                      type: number
+                    location_name:
+                      type: string
+                    parent_id:
+                      type: number
+                    parent_name:
+                      type: string
+                    child_id:
+                      type: number
+                    child_name:
+                      type: string
+              token:
+                type: string
+    post:
+      tags:
+        - Location
+      summary: Add a new location
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: location
+          description: location details
+          schema:
+            type: object
+            required:
+              - location_id
+              - location_name
+            properties:
+              location_id:
+                type: number
+              location_name:
+                type: string
+              parent_id:
+                type: number
+              child_id:
+                type: number
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+        502:
+          description: Internal Server Error
+
+  /location/{location_id}:
+    put:
+      tags:
+        - Location
+      summary: Update an existing location
+      consumes:
+        - application/json
+      description: Update location details, add child, parent
+      parameters:
+        - name: location_id
+          in: path
+          description: location_id id
+          type: integer
+          required: true
+        - name: location_info
+          in: body
+          schema:
+            type: object
+            required:
+              - location_id
+              - location_name
+              - parent_id
+              - child_id
+            properties:
+              location_id:
+                type: number
+              location_name:
+                type: string
+              parent_id:
+                type: number
+              child_id:
+                type: number
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+        502:
+          description: Internal Server Error
+    delete:
+      tags:
+        - Location
+      parameters:
+        - name: location_id
+          in: path
+          description: location_id id
+          type: integer
+          required: true
+      summary: Delete a location
+      responses:
+        200:
+          description: OK. Deleted.
+        404:
+          description: Not Found
+        502:
+          description: Internal Server Error
+
