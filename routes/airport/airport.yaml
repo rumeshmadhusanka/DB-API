@@ -2,7 +2,6 @@ swagger: "2.0"
 tags:
   - name: Airport
     description: Airport management
-
 info:
   title: Airline API
   description: A detailed description of the operation.
@@ -13,8 +12,71 @@ host: localhost:3000
 schemes:
   - http
 paths:
+  /airport/:
+    get:
+      summary: Get all airports
+      tags:
+        - Airport
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    airport_id:
+                      type: number
+                    name:
+                      type: string
+                    location:
+                      type: string
+                      description: Full address
+                    location_id:
+                      type: number
+                    code:
+                      type: string
+              token:
+                type: string
+    post:
+      tags:
+        - Airport
+      summary: Add new airport
+      consumes:
+        - application/json
+      parameters:
+        - name: details
+          in: body
+          schema:
+            type: object
+            required:
+              - location_id
+              - name
+              - code
+            properties:
+              location_id:
+                type: number
+              name:
+                type: string
+              code:
+                type: string
+      responses:
+        201:
+          description: Created
+        502:
+          description: Internal Server Error
   /airport/{airport_id}:
     get:
+      summary: Get airport by id
       tags:
         - Airport
       parameters:
@@ -22,7 +84,92 @@ paths:
           in: path
           type: integer
           required: true
+      produces:
+        - application/json
       responses:
         200:
           description: OK
-            
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    airport_id:
+                      type: number
+                    name:
+                      type: string
+                    location:
+                      type: string
+                      description: Full address
+                    location_id:
+                      type: number
+                    code:
+                      type: string
+              token:
+                type: string
+        502:
+          description: Internal Server Error
+    put:
+      tags:
+        - Airport
+      summary: Update Exsiting airport
+      consumes:
+        - application/json
+      parameters:
+        - name: airport_id
+          in: path
+          type: integer
+          required: true
+        - name: airport details
+          in: body
+          schema:
+            type: object
+            required:
+              - location_id
+              - name
+              - code
+            properties:
+              location_id:
+                type: number
+              name:
+                type: string
+              code:
+                type: string
+      responses:
+        200:
+          description: OK, Updated
+          schema:
+        404:
+          description: Not found
+        400:
+          description: Bad Request
+        502:
+          description: Internal Server Error
+    delete:
+      tags:
+        - Airport
+      parameters:
+        - name: airport_id
+          in: path
+          type: integer
+          required: true
+      summary: Delete an airport
+      responses:
+        200:
+          description: OK, deleted
+        404:
+          description: Not found
+        502:
+          description: Internal Server Error
+
+
+
+
+
