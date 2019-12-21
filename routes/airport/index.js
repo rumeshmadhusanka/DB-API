@@ -1,7 +1,7 @@
 let json_response_model = require('../../json_response');  //A function that returns the json response format object
 const router = require("express").Router();
 const Airport = require('../../models/airport');
-// const Joi_schema = require('../../validation/airport_schema');
+const Joi_schema = require('../../validation/airport_schema');
 
 
 router.get('/', async (req, res) => {

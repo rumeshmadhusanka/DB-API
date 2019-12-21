@@ -1,6 +1,5 @@
 const Joi=require('@hapi/joi');
 
-
 // const user_schema = Joi.object().keys({
 //     username: Joi.string().alphanum().min(3).max(30).required(),
 //     password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
@@ -27,4 +26,9 @@ const query_string_delete_req = Joi.object().keys({
 const id_schema=Joi.object().keys({
     id:Joi.number().integer().required()
 });
-module.exports={id_schema,query_string,booke_fight_post_schema,query_string_delete_req}
+module.exports={
+    id_schema,
+    query_string,
+    booke_fight_post_schema,
+    query_string_delete_req
+}
