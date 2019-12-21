@@ -18,7 +18,6 @@ router.get('/', async (req, res) => {
     }
 
 });
-
 router.post('/',async(req,res)=>{
     let airport_obj = new Airport();
     let json_response = json_response_model();
@@ -91,5 +90,25 @@ router.put('/:airport_id',async(req,res)=>{
             }
     } 
 });
-
+router.delete('/:airport_id',async(req,res)=>{
+    let airport_id=req.params['airport_id'];
+    let airport_obj=new Airport();
+    let json_response = json_response_model();
+    try {
+        json_response.data=await airport_obj.deleteairport(airport_id);
+        json_response.success=true;
+        json_response.message="Airport was deleted!!";
+        res.status(200).json(json_response);
+    } catch (e) {
+        json_response.message =  e;
+            let code = e.statusCode || 502;  
+            if (e._message==null && e.details[0].message ){
+                code=400;
+                json_response.message =  e.details[0].message;
+                res.status(code).json(json_response);
+            }else{
+                res.status(code).json(json_response);
+            }
+    } 
+});
 module.exports = router;

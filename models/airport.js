@@ -76,4 +76,21 @@ Airport.prototype.updateairport=async function(airport_req){
         }
     });
 }
+Airport.prototype.deleteairport=async function(airport_id){
+    let delete_query="DELETE FROM airport WHERE airport_id=?";
+    return new Promise(async(resolve,reject)=>{
+        try{
+            let pool = await poolPromise;
+            let result=await pool.query(delete_query,[airport_id]); 
+            if(result.affectedRows==0){
+                reject(new ErrorHandler(404, "Airport not found"));
+            }else if(result.affectedRows==1){
+                resolve(result);
+            }
+        }catch(e){
+            logger.log(e);
+            reject(new ErrorHandler(502, "Internal Server Error"));
+        }
+    });
+};
 module.exports=Airport;
