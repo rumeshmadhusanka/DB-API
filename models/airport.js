@@ -57,4 +57,23 @@ Airport.prototype.getairportbyid=async function(airport_id){
         }
     });
 }
+Airport.prototype.updateairport=async function(airport_req){
+    let query= "update `airport` set location_id=?,name=?,code=? where airport_id=?";
+    return new Promise(async(resolve,reject)=>{
+        try {
+            let pool = await poolPromise;
+            let result = await pool.query(query,[airport_req.location_id,airport_req.name,airport_req.code,airport_req.airport_id]);
+            // console.log(result.changedRows);
+            if(result.changedRows==0){
+                reject(new ErrorHandler(200, "Airportalready updated"));
+            }else{ 
+                resolve(result);
+            }
+        } catch (e) {
+            logger.log(e);
+            // console.log(e);
+            reject(new ErrorHandler(502, "Internal Server Error"));
+        }
+    });
+}
 module.exports=Airport;
