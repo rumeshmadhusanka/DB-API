@@ -1,0 +1,173 @@
+swagger: "2.0"
+tags:
+  - name: Route
+    description: Route
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+paths:
+  /route/:
+    get:
+      summary: Get all routes
+      tags:
+        - Route
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    route_id:
+                      type: number
+                    origin_id:
+                      type: number
+                    origin_name:
+                      type: string
+                      description: Name of the airport
+                    destination_id:
+                      type: number
+                    destination_name:
+                      type: string
+                      description: Name of the airport
+              token:
+                type: string
+        502:
+          description: Internal Server Error
+
+
+    post:
+      summary: Add new route
+      tags:
+        - Route
+      consumes:
+        - application/json
+      parameters:
+        - name: details
+          in: body
+          schema:
+            type: object
+            required:
+              - origin
+              - destination
+            properties:
+              origin:
+                type: number
+              destination:
+                type: number
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad request
+        502:
+          description: Internal Server Error
+  /route/{route_id}:
+    get:
+      summary: Get route by id
+      tags:
+        - Route
+      parameters:
+        - name: route_id
+          in: path
+          type: integer
+          required: true
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    route_id:
+                      type: number
+                    origin_id:
+                      type: number
+                    origin_name:
+                      type: string
+                      description: Name of the airport
+                    destination_id:
+                      type: number
+                    destination_name:
+                      type: string
+                      description: Name of the airport
+              token:
+                type: string
+        404:
+          description: Not found
+        502:
+          description: Internal Server Error
+    put:
+      tags:
+        - Route
+      summary: Update Route
+      consumes:
+        - application/json
+      parameters:
+        - name: route_id
+          in: path
+          type: integer
+          required: true
+        - name: details
+          in: body
+          schema:
+            type: object
+            required:
+              - origin
+              - destination
+            properties:
+              origin:
+                type: number
+              destination:
+                type: number
+      responses:
+        200:
+          description: OK, Updated
+        404:
+          description: Not found
+        400:
+          description: Bad Request
+        502:
+          description: Internal Server Error
+    delete:
+      tags:
+        - Route
+      parameters:
+        - name: route_id
+          in: path
+          type: integer
+          required: true
+      summary: Delete a route
+      responses:
+        200:
+          description: OK, deleted
+        404:
+          description: Not found
+        502:
+          description: Internal Server Error

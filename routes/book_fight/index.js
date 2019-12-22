@@ -19,7 +19,6 @@ router.get('/', async (req, res) => {
     }
 
 });
-
 router.get('/:id', async (req, res) => {
     let schedule = {"id": req.params['id']};
     let book_fight_obj = new Book_fight();
@@ -67,27 +66,6 @@ router.get('/:id', async (req, res) => {
         }
     }
 });
-// router.get('/cost',async(req,res)=>{
-//     let schedule_id=req.params['id'];
-//     // let schedule_id=req.body.schedule_id;
-//     const {user_id,seat_id, anotherField} = req.query;
-//     let json_response=json_response_model();
-//     let book_fight_obj = new book_fight();
-//     try {
-//         let results = await book_fight_obj.getpriceseat(user_id,seat_id);
-//         let result={}
-//         result["total_price"]=results[0][Object.keys(results[0])[0]];
-//         json_response.data=(result);
-//         json_response.success = true;
-//         json_response.message = "Seat cost sent";
-//         res.status(200).json(json_response);
-//     } catch (e) {
-//         json_response.message = e;
-//         let code = e.statusCode || 502;
-//         res.status(code).json(json_response);
-//     }
-// });
-
 router.post('/:schedule_id', async (req, res) => {
     let schedule_id = req.params['schedule_id'];
     // let schedule_id=req.body.schedule_id;
@@ -115,7 +93,6 @@ router.post('/:schedule_id', async (req, res) => {
         }
     }
 });
-
 router.delete('/:schedule_id', async (req, res) => {
     let schedule_id = req.params['schedule_id'];
     // let schedule_id=req.body.schedule_id;

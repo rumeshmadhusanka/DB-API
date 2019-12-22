@@ -9,7 +9,7 @@ host: localhost:3000
 schemes:
   - http
 tags:
-  - name: User
+  - name: Registered User
     description: User management
 securityDefinitions:
   OAuth2:
@@ -21,7 +21,7 @@ paths:
   /reg_user/{user_id}:
     get:
       tags:
-        - User
+        - Registered User
       summary: Get info by user id
       parameters:
         - name: user_id
@@ -70,7 +70,7 @@ paths:
           description: Server Error
     put:
       tags:
-        - User
+        - Registered User
       summary: Update user
       produces:
         - application/json
@@ -83,7 +83,7 @@ paths:
           description: Bad request
     delete:
       tags:
-        - User
+        - Registered User
       produces:
         - application/json
       summary: Delete a user
@@ -98,7 +98,7 @@ paths:
   /reg_user/:
     post:
       tags:
-        - User
+        - Registered User
       parameters:
         - in: body
           name: user
@@ -128,7 +128,6 @@ paths:
                 type: string
               password:
                 type: string
-
       produces:
         - application/json
       summary: Create a new User
@@ -143,7 +142,7 @@ paths:
   /reg_user/{user_id}/booking:
     get:
       tags:
-        - User
+        - Registered User
       summary: Get all the bookings by the customer
       produces:
         - application/json
@@ -161,7 +160,7 @@ paths:
           description: Server Error
     post:
       tags:
-        - User
+        - Registered User
       summary: Create a new booking
       produces:
         - application/json

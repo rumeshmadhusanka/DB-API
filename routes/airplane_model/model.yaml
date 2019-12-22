@@ -1,0 +1,68 @@
+swagger: "2.0"
+tags:
+  - name: Airplane Model
+    description: Airplane add/remove
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+paths:
+  /airplane_model:
+    get:
+      summary: Get all airplane models
+      tags:
+        - Airplane Model
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    model_id:
+                      type: number
+                    model_name:
+                      type: string
+                      description: Name of the model
+              token:
+                type: string
+        502:
+          description: Internal Server Error
+    post:
+      summary: Add new Airplane Model
+      tags:
+        - Airplane Model
+      consumes:
+        - application/json
+      parameters:
+        - name: details
+          in: body
+          schema:
+            type: object
+            required:
+              - model_name
+            properties:
+              model_name:
+                type: string
+      responses:
+        201:
+          description: Created
+        400:
+          description: Bad request
+        502:
+          description: Internal Server Error
