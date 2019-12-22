@@ -26,7 +26,6 @@ router.post('/',async(req,res)=>{
         code:req.body.code,
     };
     try {
-        //validation required
         await Joi_schema.airport_post.validateAsync(airport_req);
         json_response.data=await airport_obj.addairport(airport_req);
         json_response.success = true;
