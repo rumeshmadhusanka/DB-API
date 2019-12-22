@@ -5,6 +5,7 @@ module.exports = function (app) {
     app.use("/booking", require("./booking"));
     app.use("/airplane_model", require("./airplane_model"));
     app.use("/airplane", require("./airplane"));
+    app.use("/flight", require("./flight"));
     //Root route-REMOVE this
     app.use("/", (req, res) => {
         res.status(404).json({"message": "Default Route"})
