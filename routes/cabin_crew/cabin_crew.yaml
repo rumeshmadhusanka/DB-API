@@ -1,0 +1,97 @@
+swagger: "2.0"
+tags:
+  - name: Cabin crew
+    description: Cabin crew add/remove
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+paths:
+  /cabin_crew:
+    get:
+      summary: Get all cabin crew
+      tags:
+        - Cabin crew
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    staff_id:
+                      type: number
+                    name:
+                      type: string
+                    nic:
+                      type: string
+                    type:
+                      type: string
+              token:
+                type: string
+        502:
+          description: Internal Server Error
+    post:
+      summary: Add new Cabin crew member
+      tags:
+        - Cabin crew
+      consumes:
+        - application/json
+      parameters:
+        - name: details
+          in: body
+          schema:
+            type: object
+            required:
+              - name
+              - nic
+              - type
+            properties:
+              name:
+                type: string
+              nic:
+                type: string
+              type:
+                type: string
+      responses:
+        201:
+          description: Created
+        400:
+          description: Bad request
+        502:
+          description: Internal Server Error
+  /cabin_crew/{staff_id}:
+    delete:
+      summary: Remove a cabin crew member
+      tags:
+        - Cabin crew
+      consumes:
+        - application/json
+      parameters:
+        - name: staff_id
+          in: path
+          type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not found
+        502:
+          description: Internal Server Error
+

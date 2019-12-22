@@ -1,0 +1,203 @@
+swagger: "2.0"
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+tags:
+  - name: Flight
+    description: Flight management
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://example.com/oauth/authorize
+    tokenUrl: https://example.com/oauth/token
+paths:
+  /flight:
+    get:
+      tags:
+        - Flight
+      summary: Get all flights
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    flight_id:
+                      type: number
+                    route_id:
+                      type: number
+                    origin:
+                      type: string
+                    desination:
+                      type: string
+                    airpalne_id:
+                      type: number
+                    airplane_model:
+                      type: string
+              token:
+                type: string
+        404:
+          description: Not found
+        401:
+          description: Unauthorized
+        502:
+          description: Server Error
+
+
+    post:
+      tags:
+        - Flight
+      parameters:
+        - in: body
+          name: flight details
+          schema:
+            type: object
+            required:
+              - flight_id
+              - route_id
+              - airplane_id
+            properties:
+              flight_id:
+                type: number
+              route_id:
+                type: number
+              airplane_id:
+                type: number
+      produces:
+        - application/json
+      summary: Add new flight
+      responses:
+        201:
+          description: Created
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        502:
+          description: Server Error
+
+  /flight/{flight_id}:
+    get:
+      tags:
+        - Flight
+      summary: Get flights by id
+      parameters:
+        - name: flight_id
+          in: path
+          type: integer
+          required: true
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    flight_id:
+                      type: number
+                    route_id:
+                      type: number
+                    origin:
+                      type: string
+                    desination:
+                      type: string
+                    airpalne_id:
+                      type: number
+                    airplane_model:
+                      type: string
+              token:
+                type: string
+        404:
+          description: Not found
+        401:
+          description: Unauthorized
+        502:
+          description: Server Error
+
+
+    put:
+      parameters:
+        - name: flight_id
+          in: path
+          type: integer
+          required: true
+        - in: body
+          name: flight details
+          schema:
+            type: object
+            required:
+              - flight_id
+              - route_id
+              - airplane_id
+            properties:
+              flight_id:
+                type: number
+              route_id:
+                type: number
+              airplane_id:
+                type: number
+      tags:
+        - Flight
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+        404:
+          description: User not Found
+        400:
+          description: Bad request
+        502:
+          description: Server Error
+
+    delete:
+      parameters:
+        - name: flight_id
+          in: path
+          type: integer
+          required: true
+      tags:
+        - Flight
+      produces:
+        - application/json
+      summary: Delete a flight
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+        404:
+          description: User not Found
+        400:
+          description: Bad request
+        502:
+          description: Server Error
+              

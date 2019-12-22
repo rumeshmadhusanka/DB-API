@@ -1,7 +1,7 @@
 swagger: "2.0"
 tags:
-  - name: Airport
-    description: Airport management
+  - name: Route
+    description: Route
 info:
   title: Airline API
   description: A detailed description of the operation.
@@ -12,11 +12,11 @@ host: localhost:3000
 schemes:
   - http
 paths:
-  /airport/:
+  /route/:
     get:
-      summary: Get all airports
+      summary: Get all routes
       tags:
-        - Airport
+        - Route
       produces:
         - application/json
       responses:
@@ -34,23 +34,28 @@ paths:
                 items:
                   type: object
                   properties:
-                    airport_id:
+                    route_id:
                       type: number
-                    name:
-                      type: string
-                    location:
-                      type: string
-                      description: Full address
-                    location_id:
+                    origin_id:
                       type: number
-                    code:
+                    origin_name:
                       type: string
+                      description: Name of the airport
+                    destination_id:
+                      type: number
+                    destination_name:
+                      type: string
+                      description: Name of the airport
               token:
                 type: string
+        502:
+          description: Internal Server Error
+
+
     post:
+      summary: Add new route
       tags:
-        - Airport
-      summary: Add new airport
+        - Route
       consumes:
         - application/json
       parameters:
@@ -59,28 +64,27 @@ paths:
           schema:
             type: object
             required:
-              - location_id
-              - name
-              - code
+              - origin
+              - destination
             properties:
-              location_id:
+              origin:
                 type: number
-              name:
-                type: string
-              code:
-                type: string
+              destination:
+                type: number
       responses:
-        201:
-          description: Created
+        200:
+          description: OK
+        400:
+          description: Bad request
         502:
           description: Internal Server Error
-  /airport/{airport_id}:
+  /route/{route_id}:
     get:
-      summary: Get airport by id
+      summary: Get route by id
       tags:
-        - Airport
+        - Route
       parameters:
-        - name: airport_id
+        - name: route_id
           in: path
           type: integer
           required: true
@@ -101,47 +105,47 @@ paths:
                 items:
                   type: object
                   properties:
-                    airport_id:
+                    route_id:
                       type: number
-                    name:
-                      type: string
-                    location:
-                      type: string
-                      description: Full address
-                    location_id:
+                    origin_id:
                       type: number
-                    code:
+                    origin_name:
                       type: string
+                      description: Name of the airport
+                    destination_id:
+                      type: number
+                    destination_name:
+                      type: string
+                      description: Name of the airport
               token:
                 type: string
+        404:
+          description: Not found
         502:
           description: Internal Server Error
     put:
       tags:
-        - Airport
-      summary: Update Exsiting airport
+        - Route
+      summary: Update Route
       consumes:
         - application/json
       parameters:
-        - name: airport_id
+        - name: route_id
           in: path
           type: integer
           required: true
-        - name: airport details
+        - name: details
           in: body
           schema:
             type: object
             required:
-              - location_id
-              - name
-              - code
+              - origin
+              - destination
             properties:
-              location_id:
+              origin:
                 type: number
-              name:
-                type: string
-              code:
-                type: string
+              destination:
+                type: number
       responses:
         200:
           description: OK, Updated
@@ -153,13 +157,13 @@ paths:
           description: Internal Server Error
     delete:
       tags:
-        - Airport
+        - Route
       parameters:
-        - name: airport_id
+        - name: route_id
           in: path
           type: integer
           required: true
-      summary: Delete an airport
+      summary: Delete a route
       responses:
         200:
           description: OK, deleted
@@ -167,8 +171,4 @@ paths:
           description: Not found
         502:
           description: Internal Server Error
-
-
-
-
-
+            

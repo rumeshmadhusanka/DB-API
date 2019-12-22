@@ -1,7 +1,7 @@
 swagger: "2.0"
 tags:
-  - name: Airport
-    description: Airport management
+  - name: Gate
+    description: Gate
 info:
   title: Airline API
   description: A detailed description of the operation.
@@ -12,11 +12,11 @@ host: localhost:3000
 schemes:
   - http
 paths:
-  /airport/:
+  /gate/:
     get:
-      summary: Get all airports
+      summary: Get all gates
       tags:
-        - Airport
+        - Gate
       produces:
         - application/json
       responses:
@@ -34,23 +34,22 @@ paths:
                 items:
                   type: object
                   properties:
+                    gate_id:
+                      type: number
+                    gate_name:
+                      type: number
                     airport_id:
-                      type: number
-                    name:
                       type: string
-                    location:
-                      type: string
-                      description: Full address
-                    location_id:
-                      type: number
-                    code:
+                    airport_name:
                       type: string
               token:
                 type: string
+        502:
+          description: Internal Server Error
     post:
+      summary: Add new gate to an airport
       tags:
-        - Airport
-      summary: Add new airport
+        - Gate
       consumes:
         - application/json
       parameters:
@@ -59,28 +58,27 @@ paths:
           schema:
             type: object
             required:
-              - location_id
               - name
-              - code
+              - airport_id
             properties:
-              location_id:
-                type: number
               name:
                 type: string
-              code:
-                type: string
+              airport_id:
+                type: number
       responses:
-        201:
-          description: Created
+        200:
+          description: OK
+        400:
+          description: Bad request
         502:
           description: Internal Server Error
-  /airport/{airport_id}:
+  /gate/{gate_id}:
     get:
-      summary: Get airport by id
+      summary: Get gate by id
       tags:
-        - Airport
+        - Gate
       parameters:
-        - name: airport_id
+        - name: gate_id
           in: path
           type: integer
           required: true
@@ -101,47 +99,43 @@ paths:
                 items:
                   type: object
                   properties:
+                    gate_id:
+                      type: number
+                    gate_name:
+                      type: number
                     airport_id:
-                      type: number
-                    name:
                       type: string
-                    location:
-                      type: string
-                      description: Full address
-                    location_id:
-                      type: number
-                    code:
+                    airport_name:
                       type: string
               token:
                 type: string
+        404:
+          description: Not found
         502:
           description: Internal Server Error
     put:
       tags:
-        - Airport
-      summary: Update Exsiting airport
+        - Gate
+      summary: Update Gate
       consumes:
         - application/json
       parameters:
-        - name: airport_id
+        - name: gate_id
           in: path
           type: integer
           required: true
-        - name: airport details
+        - name: details
           in: body
           schema:
             type: object
             required:
-              - location_id
               - name
-              - code
+              - airport_id
             properties:
-              location_id:
-                type: number
               name:
                 type: string
-              code:
-                type: string
+              airport_id:
+                type: number
       responses:
         200:
           description: OK, Updated
@@ -153,13 +147,13 @@ paths:
           description: Internal Server Error
     delete:
       tags:
-        - Airport
+        - Gate
       parameters:
-        - name: airport_id
+        - name: gate_id
           in: path
           type: integer
           required: true
-      summary: Delete an airport
+      summary: Delete a gate
       responses:
         200:
           description: OK, deleted
@@ -167,8 +161,3 @@ paths:
           description: Not found
         502:
           description: Internal Server Error
-
-
-
-
-

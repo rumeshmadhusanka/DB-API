@@ -9,7 +9,7 @@ host: localhost:3000
 schemes:
   - http
 tags:
-  - name: Book Flight
+  - name: Flight booking
     description: Flight Booking
 securityDefinitions:
   OAuth2:
@@ -21,8 +21,8 @@ paths:
   /book_flight/:
     get:
       tags:
-        - Book Flight
-      summary: Get All Flight booking by schedule id
+        - Flight booking
+      summary: Get All Flight bookings by schedule id
       produces:
         - application/json
       responses:
@@ -54,25 +54,12 @@ paths:
                 type: string
         404:
           description: Not found
-          schema:
-            type: object
-            items:
-              type: object
-              properties:
-                success:
-                  type: boolean
-                message:
-                  type: string
-                data:
-                  type: array
-                token:
-                  type: string
         502:
           description: Internal server error
   /book_flight/:id:
     get:
       tags:
-        - Book Flight
+        - Flight booking
       summary: Get flight booking by id
       produces:
         - application/json
