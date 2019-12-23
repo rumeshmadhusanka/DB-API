@@ -47,13 +47,18 @@ Airplane_model.prototype.deleteairplanemodel=async function(model_id){
             let pool = await poolPromise;
             let result=await pool.query(delete_query,[model_id]); 
             if(result.affectedRows==0){
-                reject(new ErrorHandler(404, "Airplane not found"));
+                reject(new ErrorHandler(404, "Airplane_model not found"));
             }else if(result.affectedRows==1){
                 resolve(result);
             }
         }catch(e){
-            logger.log(e);
-            reject(new ErrorHandler(502, "Internal Server Error"));
+            if(e.sqlState==23000){ 
+                reject(new ErrorHandler(400, "Airplane model can not delete"));
+            }else{
+                logger.log(e);
+                // console.log(e);
+                reject(new ErrorHandler(502, "Internal Server Error"));
+            }
         }
     });
 };

@@ -6,7 +6,7 @@ function book_fight() {
 
 }
 book_fight.prototype.getallfights = async function () {
-    let query1 = "SELECT * from schedule WHERE `date`> CURDATE()";
+    let query1 = "SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate.name FROM(SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate_id FROM `schedule` NATURAL JOIN flight_details)ab NATURAL JOIN gate WHERE `date`> CURDATE()";
     return new Promise((async (resolve, reject) => {
         try {
             let pool = await poolPromise;
@@ -24,11 +24,10 @@ book_fight.prototype.getallfights = async function () {
     }));
 };
 book_fight.prototype.getfightsbyid = async function (schedule_id) {
-    let query1 = "SELECT * FROM schedule WHERE schedule_id=?";
+    let query1 = "SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate.name FROM(SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate_id FROM `schedule` NATURAL JOIN flight_details)ab NATURAL JOIN gate schedule_id=?";
     return new Promise((async (resolve, reject) => {
         try {
             let pool = await poolPromise;
-            
             let result = await pool.query(query1,[schedule_id]);
             if (!result.length) {
                 reject(new ErrorHandler(404, "No fight with found shechdule id "+schedule_id));

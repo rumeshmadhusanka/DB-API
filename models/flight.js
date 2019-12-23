@@ -6,7 +6,7 @@ function Flight() {
 
 }
 Flight.prototype.getallflight= async function(){
-    let query="SELECT * FROM `flight`";
+    let query="SELECT * FROM `flight_details`";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
@@ -43,7 +43,7 @@ Flight.prototype.addflight=async function(flight_req){
     });
 }
 Flight.prototype.getflightbyid=async function(flight_id){
-    let query="select * from flight where flight_id=?";
+    let query="select * from flight_details where flight_id=?";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
@@ -72,7 +72,9 @@ Flight.prototype.updateflight=async function(flight_req){
                 resolve(result);
             }
         } catch (e) {
-            if(e.sqlState==23000){ 
+            if(e.code=="ER_DUP_ENTRY"){
+                reject(new ErrorHandler(400, "That flight already exites con't upadate"));
+            }else if(e.sqlState==23000){ 
                 reject(new ErrorHandler(400, "route_id or airplane_id incorrect"));
             }else{
                 logger.log(e);
@@ -94,8 +96,13 @@ Flight.prototype.deleteflight=async function(flight_id){
                 resolve(result);
             }
         }catch(e){
-            logger.log(e);
-            reject(new ErrorHandler(502, "Internal Server Error"));
+            if(e.sqlState==23000){ 
+                reject(new ErrorHandler(400, "Gate can not delete"));
+            }else{
+                logger.log(e);
+                // console.log(e);
+                reject(new ErrorHandler(502, "Internal Server Error"));
+            }
         }
     });
 };

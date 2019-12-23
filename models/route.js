@@ -109,3 +109,7 @@ Route.prototype.deleteroute=async function(route_id){
     });
 };
 module.exports=Route;
+
+// SELECT d.flight_id,d.origin,d.destination,e.model_name FROM (SELECT flight_id,origin,destination,airplane_id from (SELECT route_id,a.origin,b.destination from (SELECT route.route_id,airport.name as origin FROM `route` LEFT OUTER JOIN `airport`on route.origin=airport.airport_id)a NATURAL JOIN (SELECT route.route_id,airport.name as destination FROM `route` LEFT OUTER JOIN `airport`on route.destination=airport.airport_id)b)c NATURAL join flight)d natural JOIN (SELECT `airplane_id`,model_name FROM `airplane` NATURAL JOIN airplane_model)e
+
+// SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate.name FROM(SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time` FROM `schedule` NATURAL JOIN flight_details)ab NATURAL JOIN gate

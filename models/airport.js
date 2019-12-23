@@ -4,6 +4,7 @@ const logger = require('../logger');
 
 function Airport() {
 }
+//getlocation function eke wada thiyei
 Airport.prototype.getallairport= async function(){
     let query="SELECT * FROM `airport`";
     return new Promise(async(resolve,reject)=>{
@@ -73,7 +74,9 @@ Airport.prototype.updateairport=async function(airport_req){
                 resolve(result);
             }
         } catch (e) {
-            if(e.sqlState==23000){ 
+            if(e.code=="ER_DUP_ENTRY"){
+                reject(new ErrorHandler(400, "That airport already exites con't upadate"));
+            }else if(e.sqlState==23000){ 
                 reject(new ErrorHandler(404, "No location_id found"));
             }else{
                 logger.log(e);
@@ -95,8 +98,13 @@ Airport.prototype.deleteairport=async function(airport_id){
                 resolve(result);
             }
         }catch(e){
-            logger.log(e);
-            reject(new ErrorHandler(502, "Internal Server Error"));
+            if(e.sqlState==23000){ 
+                reject(new ErrorHandler(400, "Airport can not delete"));
+            }else{
+                logger.log(e);
+                // console.log(e);
+                reject(new ErrorHandler(502, "Internal Server Error"));
+            }
         }
     });
 };

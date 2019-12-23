@@ -73,7 +73,9 @@ Gate.prototype.updategate=async function(gate_req){
                 resolve(result);
             }
         } catch (e) {
-            if(e.sqlState==23000){ 
+            if(e.code=="ER_DUP_ENTRY"){
+                reject(new ErrorHandler(400, "That gate already exites con't upadate"));
+            }else if(e.sqlState==23000){ 
                 reject(new ErrorHandler(404, "No airport_id found"));
             }else{
                 logger.log(e);
