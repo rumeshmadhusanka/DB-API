@@ -96,7 +96,7 @@ Gate.prototype.deletegate=async function(gate_id){
             }
         }catch(e){
             if(e.sqlState==23000){ 
-                reject(new ErrorHandler(404, "Gate can not delete"));
+                reject(new ErrorHandler(400, "Gate can not delete"));
             }else{
                 logger.log(e);
                 // console.log(e);

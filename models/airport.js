@@ -65,8 +65,10 @@ Airport.prototype.updateairport=async function(airport_req){
             let pool = await poolPromise;
             let result = await pool.query(query,[airport_req.location_id,airport_req.name,airport_req.code,airport_req.airport_id]);
             // console.log(result.changedRows);
-            if(result.changedRows==0){
+            if(result.changedRows==0 && result.affectedRows==1){
                 reject(new ErrorHandler(200, "Airport already updated"));
+            }else if(result.changedRows==0 && result.affectedRows==0){
+                reject(new ErrorHandler(404, "No airport found"));
             }else{ 
                 resolve(result);
             }
