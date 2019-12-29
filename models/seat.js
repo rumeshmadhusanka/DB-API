@@ -2,17 +2,17 @@ const poolPromise = require("../db");
 const ErrorHandler = require('../error');
 const logger = require('../logger');
 
-function Airplane_model() {
-
+function Seat() {
 }
-Airplane_model.prototype.getallairplanemodel= async function(){
-    let query="SELECT * FROM `airplane_model`";
+//getlocation function eke wada thiyei
+Seat.prototype.getseatbyid=async function(model_id){
+    let query="select * from seat where model_id=?";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
-            let result = await pool.query(query);
+            let result=await pool.query(query,[model_id]);
             if (!result.length) {
-                reject(new ErrorHandler(404, "No airplane model found"));
+                reject(new ErrorHandler(404, "No seat found"));
             } else {
                 resolve(result);
             }
@@ -22,16 +22,16 @@ Airplane_model.prototype.getallairplanemodel= async function(){
         }
     });
 }
-Airplane_model.prototype.addairplanemodel=async function(airplane_model_req){
-    let query= "INSERT INTO `airplane_model` (model_id,model_name) VALUES (?,?)";
+Seat.prototype.addseat=async function(seat_req){
+    let query= "INSERT INTO `seat` (`model_id`, `seat_name`, `class`) VALUES (?,?,?);";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
-            let result = await pool.query(query,[airplane_model_req.model_id,airplane_model_req.model_name]);
+            let result = await pool.query(query,[seat_req.model_id,seat_req.seat_name,seat_req.class]);
             resolve(result);
         } catch (e) {
-            if(e.sqlState==45000){
-                reject(new ErrorHandler(400, "Airplane model already added"));
+            if(e.code=="ER_DUP_ENTRY"){
+                reject(new ErrorHandler(400, "Seat already added"));
             }else{ 
                 logger.log(e);
                 console.log(e);
@@ -40,20 +40,20 @@ Airplane_model.prototype.addairplanemodel=async function(airplane_model_req){
         }
     });
 }
-Airplane_model.prototype.deleteairplanemodel=async function(model_id){
-    let delete_query="DELETE FROM airplane_model WHERE model_id=?";
+Seat.prototype.deleteseat=async function(model_id){
+    let delete_query="DELETE FROM seat WHERE model_id=?";
     return new Promise(async(resolve,reject)=>{
         try{
             let pool = await poolPromise;
             let result=await pool.query(delete_query,[model_id]); 
             if(result.affectedRows==0){
-                reject(new ErrorHandler(404, "Airplane_model not found"));
+                reject(new ErrorHandler(404, "Seat not found"));
             }else if(result.affectedRows==1){
                 resolve(result);
             }
         }catch(e){
             if(e.sqlState==23000){ 
-                reject(new ErrorHandler(400, "Airplane model can not delete"));
+                reject(new ErrorHandler(400, "Seat can not delete"));
             }else{
                 logger.log(e);
                 // console.log(e);
@@ -62,4 +62,4 @@ Airplane_model.prototype.deleteairplanemodel=async function(model_id){
         }
     });
 };
-module.exports=Airplane_model;
+module.exports=Seat;

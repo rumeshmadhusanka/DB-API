@@ -5,7 +5,7 @@ const logger = require('../logger');
 function Airplane() {
 }
 Airplane.prototype.getallairplane= async function(){
-    let query="SELECT * FROM `airplane`";
+    let query="SELECT airplane_id,airplane_model.model_name FROM `airplane` NATURAL JOIN airplane_model";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;

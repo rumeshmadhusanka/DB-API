@@ -1,14 +1,16 @@
+// there are problems in getlocation function and what loaction front end want
+//not completed
 let json_response_model = require('../../json_response');  //A function that returns the json response format object
 const router = require("express").Router();
-const Airport = require('../../models/airport');
-const Joi_schema = require('../../validation/airport_schema');
+Location= require('../../models/location');
+const Joi_schema = require('../../validation/location_schema');
 
 
 router.get('/', async (req, res) => {
-    let airport_obj = new Airport();
+    let location_obj = new Location();
     let json_response = json_response_model();
     try {
-        json_response.data = await airport_obj.getallairport();
+        json_response.data = await location_obj.getalllocation();
         json_response.success = true;
         res.status(200).json(json_response);
     } catch (e) {
@@ -25,7 +27,7 @@ router.post('/',async(req,res)=>{
         name:req.body.name,
         code:req.body.code,
     };
-    try {
+    try {   
         await Joi_schema.airport_post.validateAsync(airport_req);
         json_response.data=await airport_obj.addairport(airport_req);
         json_response.success = true;

@@ -6,7 +6,7 @@ function Booking() {
 
 }
 Booking.prototype.getallbookings= async function(){
-    let query="SELECT * FROM `book`";
+    let query="SELECT * FROM `book_details`";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
@@ -23,7 +23,7 @@ Booking.prototype.getallbookings= async function(){
     });
 }
 Booking.prototype.getbookingbyschedule=async function(schedule_id){
-    let query="select * from book where schedule_id=?";
+    let query="select * from book_details where schedule_id=?";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
@@ -40,3 +40,6 @@ Booking.prototype.getbookingbyschedule=async function(schedule_id){
     });
 }
 module.exports=Booking;
+
+// (SELECT id,book.date,seat_id,user_id,schedule_details.date as scheduled_date,origin,destination,model_name as airplane_model,dep_time,arival_time,schedule_details.name as gate_name FROM `book` JOIN schedule_details on book.schedule_id=schedule_details.schedule_id)
+// SELECT id,a.date,user_id,a.scheduled_date,origin,destination,a.airplane_model,dep_time,arival_time,a.gate_name, seat_name,b.seat_class from (SELECT id,book.date,seat_id,user_id,schedule_details.date as scheduled_date,origin,destination,model_name as airplane_model,dep_time,arival_time,schedule_details.name as gate_name FROM `book` JOIN schedule_details on book.schedule_id=schedule_details.schedule_id)a natural JOIN (SELECT id,seat_name,class as seat_class FROM `book` natural JOIN seat)b
