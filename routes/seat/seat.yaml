@@ -71,7 +71,7 @@ paths:
       parameters:
         - name: model_id
           in: path
-          type: integer
+          type: string
           required: true
         - name: body
           in: body
