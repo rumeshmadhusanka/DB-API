@@ -45,5 +45,46 @@ Schedule.prototype.getRestrictedSchedules = async function (origin, destination,
 
 };
 
+Schedule.prototype.createNewSchedule = async function (date, flight_id, dep_time, arrival_time, gate_id) {
+    let query = "INSERT INTO  schedule(date, flight_id, dep_time, arival_time, gate_id) values(?,?,?,?,?)";
+    return new Promise(async (resolve, reject) => {
+        try {
+            let pool = await poolPromise;
+            let result = await pool.query(query, [date, flight_id, dep_time, arrival_time, gate_id]);
+            resolve(result);
+        } catch (e) {
+            if (e.sqlState === 23000) {
+                reject(new ErrorHandler(404, "Invalid arguments"));
+            } else {
+                logger.log(e);
+                console.log(e);
+                reject(new ErrorHandler(502, "Internal Server Error"));
+            }
+        }
+    });
+
+};
+
+Schedule.prototype.updateSchedule = async function (date, flight_id, dep_time, arrival_time, gate_id, schedule_id) {
+    //console.log(date, flight_id, dep_time, arrival_time, gate_id,schedule_id);
+    let query = "Update schedule set date =?, flight_id=?, dep_time=?, arival_time=?,gate_id = ? where schedule_id=?";
+    return new Promise(async (resolve, reject) => {
+        try {
+            let pool = await poolPromise;
+            let result = await pool.query(query, [date, flight_id, dep_time, arrival_time, gate_id, schedule_id]);
+            resolve(result);
+        } catch (e) {
+            if (e.sqlState === 23000) {
+                reject(new ErrorHandler(404, "Invalid arguments"));
+            } else {
+                logger.log(e);
+                console.log(e);
+                reject(new ErrorHandler(502, "Internal Server Error"));
+            }
+        }
+    });
+
+};
+
 
 module.exports = Schedule;
