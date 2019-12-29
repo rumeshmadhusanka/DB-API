@@ -24,7 +24,7 @@ book_fight.prototype.getallfights = async function () {
     }));
 };
 book_fight.prototype.getfightsbyid = async function (schedule_id) {
-    let query1 = "SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate.name FROM(SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate_id FROM `schedule` NATURAL JOIN flight_details)ab NATURAL JOIN gate schedule_id=?";
+    let query1 = "SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate.name FROM(SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate_id FROM `schedule` NATURAL JOIN flight_details)ab NATURAL JOIN gate where schedule_id=?";
     return new Promise((async (resolve, reject) => {
         try {
             let pool = await poolPromise;
@@ -35,6 +35,7 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
                 resolve(result);
             }
         } catch (e) {
+            console.log(e);
             logger.log(e);
             reject(new ErrorHandler(502, "Internal Server Error"));
         }
