@@ -4,7 +4,7 @@
   "description": "node app ",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "nodemon -e yaml,js,json index.js",
     "start": "pm2 start process.yaml;pm2 monit",
     "stop": "pm2 delete db-backend",
     "test": "mocha --recursive"
