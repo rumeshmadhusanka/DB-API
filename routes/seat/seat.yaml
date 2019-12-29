@@ -26,7 +26,7 @@ paths:
       parameters:
         - name: model_id
           in: path
-          type: integer
+          type: string
           required: true
       produces:
         - application/json
@@ -83,7 +83,7 @@ paths:
               - class
             properties:
               model_id:
-                type: number
+                type: string
               seat_name:
                 type: string
               class:
