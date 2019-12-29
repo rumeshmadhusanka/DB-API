@@ -93,8 +93,14 @@ paths:
           in: body
           schema:
             required:
+              - date
               - flight_id
+              - dep_time
+              - arrival_time
+              - gate_id
             properties:
+              date:
+                type: string
               flight_id:
                 type: number
               dep_time:
