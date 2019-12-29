@@ -6,7 +6,7 @@ function Airplane_model() {
 
 }
 Airplane_model.prototype.getallairplanemodel= async function(){
-    let query="SELECT * FROM `airplane_model`";
+    let query = "SELECT airplane_model.model_id, airplane_model.model_name, a.airplane_id  FROM `airplane_model` inner join airplane a on airplane_model.model_id = a.model_id";
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
