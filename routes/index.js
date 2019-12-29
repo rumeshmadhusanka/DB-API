@@ -9,6 +9,7 @@ module.exports = function (app) {
     app.use("/gate", require("./gate"));
     app.use("/route", require("./route"));
     app.use("/seat", require("./seat"));
+    app.use("/schedule", require("./schedule"));
     //Root route-REMOVE this
     app.use("/", (req, res) => {
         res.status(404).json({"message": "Default Route"})
