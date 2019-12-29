@@ -56,8 +56,11 @@ paths:
             type: object
             required:
               - model_name
+              - model_id
             properties:
               model_name:
+                type: string
+              model_id:
                 type: string
       responses:
         201:
