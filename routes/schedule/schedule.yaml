@@ -66,6 +66,8 @@ paths:
                       type: string
                     airplane_id:
                       type: number
+                    model_id:
+                      type: string
                     airplane_model:
                       type: string
                     dep_time:
