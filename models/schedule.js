@@ -12,6 +12,7 @@ Schedule.prototype.getAllSchedules = async function () {
         try {
             let pool = await poolPromise;
             let result = await pool.query(query);
+            result = result[0];
             if (!result.length) {
                 reject(new ErrorHandler(404, "No airplane found"));
             } else {
