@@ -106,15 +106,16 @@ paths:
           schema:
             type: object
             required:
-              - first_names
+              - first_name
               - second_name
               - email
               - nic
               - passport_id
+              - birthday
               - username
               - password
             properties:
-              first_names:
+              first_name:
                 type: string
               second_name:
                 type: string
@@ -123,6 +124,8 @@ paths:
               nic:
                 type: string
               passport_id:
+                type: string
+              birthday:
                 type: string
               username:
                 type: string
@@ -178,3 +181,31 @@ paths:
           description: Bad request
         502:
           description: Server Error
+  /reg_user/login/:
+    post:
+      tags:
+        - Registered User
+      consumes:
+        - application/json
+      parameters:
+        - name: details
+          in: body
+          schema:
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        201:
+          description: Token created
+
+        400:
+          description: Bad request
+        502:
+          description: Server Error
+
+            
