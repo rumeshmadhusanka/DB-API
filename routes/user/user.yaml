@@ -1,0 +1,64 @@
+swagger: "2.0"
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+tags:
+  - name: User
+    description: User
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://example.com/oauth/authorize
+    tokenUrl: https://example.com/oauth/token
+paths:
+  /user:
+    post:
+      tags:
+        - User
+      parameters:
+        - in: body
+          name: user
+          description: users details
+          schema:
+            type: object
+            required:
+              - first_name
+              - second_name
+              - email
+              - nic
+              - passport_id
+              - birthday
+            properties:
+              first_name:
+                type: string
+              second_name:
+                type: string
+              email:
+                type: string
+              nic:
+                type: string
+              passport_id:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
+              birthday:
+                type: string
+      produces:
+        - application/json
+      summary: Enter Unregistered user details
+      responses:
+        201:
+          description: Created
+        400:
+          description: Bad request
+        502:
+          description: Server Error

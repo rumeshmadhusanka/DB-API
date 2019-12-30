@@ -9,7 +9,7 @@ host: localhost:3000
 schemes:
   - http
 tags:
-  - name: User
+  - name: Registered User
     description: User management
 securityDefinitions:
   OAuth2:
@@ -21,7 +21,7 @@ paths:
   /reg_user/{user_id}:
     get:
       tags:
-        - User
+        - Registered User
       summary: Get info by user id
       parameters:
         - name: user_id
@@ -70,7 +70,7 @@ paths:
           description: Server Error
     put:
       tags:
-        - User
+        - Registered User
       summary: Update user
       produces:
         - application/json
@@ -83,7 +83,7 @@ paths:
           description: Bad request
     delete:
       tags:
-        - User
+        - Registered User
       produces:
         - application/json
       summary: Delete a user
@@ -98,7 +98,7 @@ paths:
   /reg_user/:
     post:
       tags:
-        - User
+        - Registered User
       parameters:
         - in: body
           name: user
@@ -106,15 +106,16 @@ paths:
           schema:
             type: object
             required:
-              - first_names
+              - first_name
               - second_name
               - email
               - nic
               - passport_id
+              - birthday
               - username
               - password
             properties:
-              first_names:
+              first_name:
                 type: string
               second_name:
                 type: string
@@ -124,11 +125,12 @@ paths:
                 type: string
               passport_id:
                 type: string
+              birthday:
+                type: string
               username:
                 type: string
               password:
                 type: string
-
       produces:
         - application/json
       summary: Create a new User
@@ -143,7 +145,7 @@ paths:
   /reg_user/{user_id}/booking:
     get:
       tags:
-        - User
+        - Registered User
       summary: Get all the bookings by the customer
       produces:
         - application/json
@@ -161,7 +163,7 @@ paths:
           description: Server Error
     post:
       tags:
-        - User
+        - Registered User
       summary: Create a new booking
       produces:
         - application/json
@@ -179,8 +181,31 @@ paths:
           description: Bad request
         502:
           description: Server Error
+  /reg_user/login/:
+    post:
+      tags:
+        - Registered User
+      consumes:
+        - application/json
+      parameters:
+        - name: details
+          in: body
+          schema:
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        201:
+          description: Token created
 
+        400:
+          description: Bad request
+        502:
+          description: Server Error
 
-
-
-
+            
