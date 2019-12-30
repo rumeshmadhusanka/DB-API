@@ -64,3 +64,29 @@ paths:
           description: Unauthorized
         502:
           description: Server Error
+  /book_flight/{schedule_id}:
+    post:
+      tags:
+        - Booking
+      parameters:
+        - name: schedule_id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          schema:
+            required:
+              - seat_id
+              - user_id
+            properties:
+              seat_id:
+                type: number
+              user_id:
+                type: number
+      consumes:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
