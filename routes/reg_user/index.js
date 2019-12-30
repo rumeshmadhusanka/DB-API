@@ -71,7 +71,7 @@ router.post('/login', (req, res) => {
 
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id',async (req, res) => {
     let user_id=req.params["id"];
     let first_name = req.body.first_name;
     let second_name = req.body.second_name;
