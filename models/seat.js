@@ -5,18 +5,19 @@ const logger = require('../logger');
 function Seat() {
 }
 //getlocation function eke wada thiyei
-Seat.prototype.getseatbyid=async function(model_id){
-    let query="select * from seat where model_id=?";
+Seat.prototype.getfreeseatbyid=async function(schedule_id){
+    // let query="select * from seat where model_id=?";
+    let query="SELECT a.seat_id,a.seat_name FROM (SELECT seat_id,seat_name from `seat_details_according_to_schedule` where schedule_id=?)a WHERE seat_id not in (SELECT seat_id from book WHERE schedule_id=?)"
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
-            let result=await pool.query(query,[model_id]);
-            if (!result.length) {
+            let result=await pool.query(query,[schedule_id,schedule_id]);
+            if (!result.length){
                 reject(new ErrorHandler(404, "No seat found"));
-            } else {
+            }else{
                 resolve(result);
             }
-        } catch (e) {
+        }catch (e){
             logger.log(e);
             reject(new ErrorHandler(502, "Internal Server Error"));
         }
@@ -63,3 +64,5 @@ Seat.prototype.deleteseat=async function(model_id){
     });
 };
 module.exports=Seat;
+// SELECT a.seat_id,a.seat_name FROM (SELECT seat_id,seat_name from `seat_details_according_to_schedule` where schedule_id=1)a WHERE seat_id not in (SELECT seat_id from book WHERE schedule_id=1)
+// SELECT * FROM `schedule` NATURAL JOIN flight NATURAL JOIN seat WHERE schedule_id=1

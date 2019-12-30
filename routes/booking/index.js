@@ -16,7 +16,6 @@ router.get('/', async (req, res) => {
         res.status(code).json(json_response);
     }
 });
-
 router.get('/:schedule_id',async(req,res)=>{  
     let booking_obj = new Booking(); 
     let schedule_id=req.params["schedule_id"];
@@ -38,7 +37,6 @@ router.get('/:schedule_id',async(req,res)=>{
         }
     }
 });
-
 router.get('/:schedule_id/:user_id', async (req, res) => {
     let schedule_id=req.params["schedule_id"];
     let user_id=req.params["user_id"];
