@@ -26,7 +26,7 @@ RegUser.prototype.getUserById = async function (user_id) {
     }));
 };
 
-RegUser.prototype.addUser = function (first_name,
+RegUser.prototype.addUser =async function (first_name,
                                       second_name,
                                       email,
                                       nic,
@@ -63,12 +63,29 @@ RegUser.prototype.addUser = function (first_name,
     }));
 };
 
-RegUser.prototype.bookFlight = function () {
-
-};
-
-RegUser.prototype.updateUser = function () {
-
+RegUser.prototype.updateUser = async function (user_id,
+                                        first_name,
+                                        second_name,
+                                        email,
+                                        nic,
+                                        passport_id,
+                                        birthday,
+                                        user_name,
+                                        password) {
+    let hashedPassword = bcrypt.hashSync(password, 10);
+    let query = "call update_user(?,?,?,?,?,?,?,?,?)";
+    return new Promise((async (resolve, reject) => {
+        try {
+            let pool = await poolPromise;
+            let result = await pool.query(query, [first_name, second_name, email, nic, passport_id, birthday, user_name, hashedPassword, user_id]);
+            console.log(result);
+            resolve(result);
+        } catch (e) {
+            console.log(e);
+            logger.log(e);
+            reject(new ErrorHandler(502, "Internal Server Error"));
+        }
+    }));
 };
 
 RegUser.prototype.deleteUser = function () {

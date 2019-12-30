@@ -72,6 +72,37 @@ router.post('/login', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
+    let user_id=req.params["id"];
+    let first_name = req.body.first_name;
+    let second_name = req.body.second_name;
+    let email = req.body.email;
+    let nic = req.body.nic;
+    let passport_id = req.body.passport_id;
+    let birthday = req.body.birthday;
+    let username = req.body.username;
+    let password = req.body.password;
+
+    let user = new RegUser();
+    let json_response = json_response_model();
+    try {
+        console.log(user_id,first_name, second_name, email, nic, passport_id, birthday, username, password);
+        let results = await user.updateUser(user_id,first_name, second_name, email, nic, passport_id, birthday, username, password);
+        json_response.success = true;
+        let send_results = results[0];
+        json_response.message = "Successfully Updated " + first_name;
+        res.status(200).json(json_response);
+    } catch (e) {
+        json_response.message = e;
+        let code = e.statusCode || 502;
+        if (e._message == null && e.details[0].message) {
+            code = 400;
+            json_response.message = e.details[0].message;
+            res.status(code).json(json_response);
+        } else {
+            res.status(code).json(json_response);
+        }
+        res.status(502).send();
+    }
 
 });
 
