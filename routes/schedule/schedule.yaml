@@ -66,6 +66,8 @@ paths:
                       type: string
                     airplane_id:
                       type: number
+                    model_id:
+                      type: string
                     airplane_model:
                       type: string
                     dep_time:
@@ -93,8 +95,14 @@ paths:
           in: body
           schema:
             required:
+              - date
               - flight_id
+              - dep_time
+              - arrival_time
+              - gate_id
             properties:
+              date:
+                type: string
               flight_id:
                 type: number
               dep_time:
@@ -126,10 +134,12 @@ paths:
           in: body
           schema:
             required:
-              - schedule_id
+              - date
+              - flight_id
+              - dep_time
+              - arrival_time
+              - gate_id
             properties:
-              schedule_id:
-                type: number
               date:
                 type: string
               flight_id:
@@ -151,4 +161,3 @@ paths:
           description: Unauthorized
         502:
           description: Server Error
-

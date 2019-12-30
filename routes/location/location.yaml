@@ -138,4 +138,3 @@ paths:
           description: Not Found
         502:
           description: Internal Server Error
-

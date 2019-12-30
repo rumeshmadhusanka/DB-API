@@ -1,7 +1,4 @@
 swagger: "2.0"
-tags:
-  - name: Route
-    description: Route
 info:
   title: Airline API
   description: A detailed description of the operation.
@@ -11,12 +8,21 @@ info:
 host: localhost:3000
 schemes:
   - http
+tags:
+  - name: Flight
+    description: Flight management
+securityDefinitions:
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://example.com/oauth/authorize
+    tokenUrl: https://example.com/oauth/token
 paths:
-  /route/:
+  /flight:
     get:
-      summary: Get all routes
       tags:
-        - Route
+        - Flight
+      summary: Get all flights
       produces:
         - application/json
       responses:
@@ -34,57 +40,67 @@ paths:
                 items:
                   type: object
                   properties:
+                    flight_id:
+                      type: number
                     route_id:
                       type: number
-                    origin_id:
-                      type: number
-                    origin_name:
+                    origin:
                       type: string
-                      description: Name of the airport
-                    destination_id:
-                      type: number
-                    destination_name:
+                    desination:
                       type: string
-                      description: Name of the airport
+                    airpalne_id:
+                      type: number
+                    airplane_model:
+                      type: string
               token:
                 type: string
+        404:
+          description: Not found
+        401:
+          description: Unauthorized
         502:
-          description: Internal Server Error
+          description: Server Error
 
 
     post:
-      summary: Add new route
       tags:
-        - Route
-      consumes:
-        - application/json
+        - Flight
       parameters:
-        - name: details
-          in: body
+        - in: body
+          name: flight details
           schema:
             type: object
             required:
-              - origin
-              - destination
+              - flight_id
+              - route_id
+              - airplane_id
             properties:
-              origin:
+              flight_id:
                 type: number
-              destination:
+              route_id:
                 type: number
+              airplane_id:
+                type: number
+      produces:
+        - application/json
+      summary: Add new flight
       responses:
-        200:
-          description: OK
+        201:
+          description: Created
         400:
           description: Bad request
+        401:
+          description: Unauthorized
         502:
-          description: Internal Server Error
-  /route/{route_id}:
+          description: Server Error
+
+  /flight/{flight_id}:
     get:
-      summary: Get route by id
       tags:
-        - Route
+        - Flight
+      summary: Get flights by id
       parameters:
-        - name: route_id
+        - name: flight_id
           in: path
           type: integer
           required: true
@@ -105,69 +121,82 @@ paths:
                 items:
                   type: object
                   properties:
+                    flight_id:
+                      type: number
                     route_id:
                       type: number
-                    origin_id:
-                      type: number
-                    origin_name:
+                    origin:
                       type: string
-                      description: Name of the airport
-                    destination_id:
-                      type: number
-                    destination_name:
+                    desination:
                       type: string
-                      description: Name of the airport
+                    airpalne_id:
+                      type: number
+                    airplane_model:
+                      type: string
               token:
                 type: string
         404:
           description: Not found
+        401:
+          description: Unauthorized
         502:
-          description: Internal Server Error
+          description: Server Error
+
+
     put:
-      tags:
-        - Route
-      summary: Update Route
-      consumes:
-        - application/json
       parameters:
-        - name: route_id
+        - name: flight_id
           in: path
           type: integer
           required: true
-        - name: details
-          in: body
+        - in: body
+          name: flight details
           schema:
             type: object
             required:
-              - origin
-              - destination
+              - flight_id
+              - route_id
+              - airplane_id
             properties:
-              origin:
+              flight_id:
                 type: number
-              destination:
+              route_id:
                 type: number
+              airplane_id:
+                type: number
+      tags:
+        - Flight
       responses:
         200:
-          description: OK, Updated
+          description: OK
+        401:
+          description: Unauthorized
         404:
-          description: Not found
+          description: User not Found
         400:
-          description: Bad Request
+          description: Bad request
         502:
-          description: Internal Server Error
+          description: Server Error
+
     delete:
-      tags:
-        - Route
       parameters:
-        - name: route_id
+        - name: flight_id
           in: path
           type: integer
           required: true
-      summary: Delete a route
+      tags:
+        - Flight
+      produces:
+        - application/json
+      summary: Delete a flight
       responses:
         200:
-          description: OK, deleted
+          description: OK
+        401:
+          description: Unauthorized
         404:
-          description: Not found
+          description: User not Found
+        400:
+          description: Bad request
         502:
-          description: Internal Server Error
+          description: Server Error

@@ -1,14 +1,14 @@
 let json_response_model = require('../../json_response');  //A function that returns the json response format object
 const router = require("express").Router();
-const Airport = require('../../models/airport');
-const Joi_schema = require('../../validation/airport_schema');
+const Route = require('../../models/route');
+const Joi_schema = require('../../validation/route_schema');
 
 
 router.get('/', async (req, res) => {
-    let airport_obj = new Airport();
+    let route_obj = new Route();
     let json_response = json_response_model();
     try {
-        json_response.data = await airport_obj.getallairport();
+        json_response.data = await route_obj.getallroute();
         json_response.success = true;
         res.status(200).json(json_response);
     } catch (e) {
@@ -19,15 +19,15 @@ router.get('/', async (req, res) => {
 
 });
 router.post('/',async(req,res)=>{
-    let airport_obj = new Airport();
+    let route_obj = new Route();
     let json_response = json_response_model();
-    let airport_req={location_id:req.body.location_id,
-        name:req.body.name,
-        code:req.body.code,
+    let route_req={
+        origin:req.body.origin,
+        destination:req.body.destination,
     };
     try {
-        await Joi_schema.airport_post.validateAsync(airport_req);
-        json_response.data=await airport_obj.addairport(airport_req);
+        await Joi_schema.route_post.validateAsync(route_req);
+        json_response.data=await route_obj.addroute(route_req);
         json_response.success = true;
         json_response.message = "Successfully added";
         res.status(201).json(json_response);
@@ -43,13 +43,13 @@ router.post('/',async(req,res)=>{
             }
     } 
 });
-router.get('/:airport_id',async(req,res)=>{
-    let airport_obj = new Airport(); 
-    let airport_id=req.params["airport_id"];
+router.get('/:route_id',async(req,res)=>{
+    let route_obj = new Route(); 
+    let route_id=req.params["route_id"];
     let json_response=json_response_model();
     try {
-        await Joi_schema.airport_id_check.validateAsync({airport_id});
-        json_response.data= await airport_obj.getairportbyid(airport_id);
+        await Joi_schema.route_id_check.validateAsync({route_id});
+        json_response.data= await route_obj.getroutetbyid(route_id);
         json_response.success = true;
         res.status(200).json(json_response);
     } catch (e) {
@@ -64,18 +64,17 @@ router.get('/:airport_id',async(req,res)=>{
         }
     }
 });
-router.put('/:airport_id',async(req,res)=>{ 
-    let airport_obj = new Airport();
+router.put('/:route_id',async(req,res)=>{ 
+    let route_obj = new Route();
     let json_response = json_response_model();
-    let airport_req={
-        airport_id:parseInt(req.params['airport_id'],10),
-        location_id:req.body.location_id,
-        name:req.body.name,
-        code:req.body.code,
+    let route_req={
+        route_id:parseInt(req.params['route_id'],10),
+        origin:req.body.origin,
+        destination:req.body.destination,
     };
     try {
-        await Joi_schema.airport_put.validateAsync(airport_req);
-        json_response.data=await airport_obj.updateairport(airport_req);
+        await Joi_schema.route_put.validateAsync(route_req);
+        json_response.data=await route_obj.updateroute(route_req);
         json_response.success = true;
         json_response.message = "Updated successfully";
         res.status(200).json(json_response);
@@ -91,15 +90,15 @@ router.put('/:airport_id',async(req,res)=>{
             }
     } 
 });
-router.delete('/:airport_id',async(req,res)=>{
-    let airport_id=req.params['airport_id'];
-    let airport_obj=new Airport();
+router.delete('/:route_id',async(req,res)=>{
+    let route_id=req.params['route_id'];
+    let route_obj=new Route();
     let json_response = json_response_model();
     try {
-        await Joi_schema.airport_id_check.validateAsync({airport_id});
-        json_response.data=await airport_obj.deleteairport(airport_id);
+        await Joi_schema.route_id_check.validateAsync({route_id});
+        json_response.data=await route_obj.deleteroute(route_id);
         json_response.success=true;
-        json_response.message="Airport was deleted!!";
+        json_response.message="Route was deleted!!";
         res.status(200).json(json_response);
     } catch (e) {
         json_response.message =  e;

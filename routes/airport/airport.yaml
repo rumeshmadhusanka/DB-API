@@ -145,6 +145,7 @@ paths:
       responses:
         200:
           description: OK, Updated
+          schema:
         404:
           description: Not found
         400:
@@ -167,8 +168,3 @@ paths:
           description: Not found
         502:
           description: Internal Server Error
-
-
-
-
-
