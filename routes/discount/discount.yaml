@@ -1,0 +1,39 @@
+swagger: "2.0"
+tags:
+  - name: Discount
+    description: Discounts
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
+paths:
+  /discount/{user_id}:
+    get:
+      security:
+        - ApiKeyAuth: []
+      summary: Get discount given the passenger
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          type: number
+      tags:
+        - Discount
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not Found
+        502:
+          description: Server Error
+            

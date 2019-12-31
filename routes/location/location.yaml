@@ -9,6 +9,11 @@ info:
     such as **bold**, *italic*, and [links](https://swagger.io).
   version: 1.0.0
 host: localhost:3000
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 schemes:
   - http
 paths:
@@ -47,6 +52,8 @@ paths:
               token:
                 type: string
     post:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Location
       summary: Add a new location
@@ -82,6 +89,8 @@ paths:
 
   /location/{location_id}:
     put:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Location
       summary: Update an existing location
@@ -122,6 +131,8 @@ paths:
         502:
           description: Internal Server Error
     delete:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Location
       parameters:
