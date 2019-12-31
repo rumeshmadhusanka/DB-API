@@ -12,14 +12,15 @@ tags:
   - name: Registered User
     description: User management
 securityDefinitions:
-  OAuth2:
-    type: oauth2
-    flow: accessCode
-    authorizationUrl: https://example.com/oauth/authorize
-    tokenUrl: https://example.com/oauth/token
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 paths:
   /reg_user/{user_id}:
     get:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Registered User
       summary: Get info by user id
@@ -69,11 +70,45 @@ paths:
         502:
           description: Server Error
     put:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Registered User
       summary: Update user
       produces:
         - application/json
+      parameters:
+        - in: body
+          name: user
+          description: users details
+          schema:
+            type: object
+            required:
+              - first_name
+              - second_name
+              - email
+              - nic
+              - passport_id
+              - birthday
+              - username
+              - password
+            properties:
+              first_name:
+                type: string
+              second_name:
+                type: string
+              email:
+                type: string
+              nic:
+                type: string
+              passport_id:
+                type: string
+              birthday:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
       responses:
         200:
           description: OK
@@ -82,6 +117,8 @@ paths:
         400:
           description: Bad request
     delete:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Registered User
       produces:
@@ -144,6 +181,8 @@ paths:
 
   /reg_user/{user_id}/booking:
     get:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Registered User
       summary: Get all the bookings by the customer
@@ -162,6 +201,8 @@ paths:
         502:
           description: Server Error
     post:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Registered User
       summary: Create a new booking
@@ -200,9 +241,8 @@ paths:
               password:
                 type: string
       responses:
-        201:
-          description: Token created
-
+        200:
+          description: Login Success, Token created
         400:
           description: Bad request
         502:

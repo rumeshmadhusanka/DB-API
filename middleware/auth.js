@@ -67,10 +67,10 @@ module.exports = {
         }
     },
 
-    isSameUser: async (req, res, next) => {
+    isSameRegUser: async (req, res, next) => {
         //let json_response = Object.create(json_response_model)
         let json_response = json_response_model();
-        if (req.userId === req.params.id) {
+        if (req.userId === req.params.user_id || req.userId === req.query.user_id) {
             next()
         } else {
             json_response['success'] = false;

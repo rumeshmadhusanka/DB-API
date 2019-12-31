@@ -2,7 +2,7 @@ let json_response_model = require('../../json_response');  //A function that ret
 const router = require("express").Router();
 const Schedule = require('../../models/schedule');
 //const Joi_schema = require('../../validation/schedule_schema'); //todo implement schema
-
+const auth = require('../../middleware/auth');
 
 router.get('/', async (req, res) => {
     let airplane_obj = new Schedule();

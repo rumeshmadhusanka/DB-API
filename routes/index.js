@@ -1,6 +1,6 @@
 module.exports = function (app) {
     app.use("/reg_user", require("./reg_user"));
-    app.use("/book_fight", require("./book_fight"));
+    app.use("/book_flight", require("./book_fight"));
     app.use("/airport", require("./airport"));
     app.use("/booking", require("./booking"));
     app.use("/airplane_model", require("./airplane_model"));
@@ -10,6 +10,8 @@ module.exports = function (app) {
     app.use("/route", require("./route"));
     app.use("/seat", require("./seat"));
     app.use("/schedule", require("./schedule"));
+    app.use("/admin", require("./admin"));
+    app.use("/discount", require("./discount"));
     //Root route-REMOVE this
     app.use("/", (req, res) => {
         res.status(404).json({"message": "Default Route"})

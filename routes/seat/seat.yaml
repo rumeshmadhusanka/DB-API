@@ -18,14 +18,28 @@ securityDefinitions:
     authorizationUrl: https://example.com/oauth/authorize
     tokenUrl: https://example.com/oauth/token
 paths:
-  /seat/{model_id}:
+  /seat:
     get:
       tags:
         - Seat
-      summary: Get all seats in an airplane model
+      summary: has a query param
       parameters:
-        - name: model_id
-          in: path
+        - name: schedule_id
+          type: string
+          in: query
+          required: true
+      responses:
+        200:
+          description: OK
+
+  /seat/free:
+    get:
+      tags:
+        - Seat
+      summary: Get free seats in a schedule by schedule id
+      parameters:
+        - name: schedule_id
+          in: query
           type: string
           required: true
       produces:
@@ -33,30 +47,6 @@ paths:
       responses:
         200:
           description: OK
-          schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-              message:
-                type: string
-              data:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    seat_id:
-                      type: number
-                    model_id:
-                      type: number
-                    model_name:
-                      type: string
-                    seat_name:
-                      type: string
-                    class:
-                      type: string
-              token:
-                type: string
         404:
           description: Not found
         401:
@@ -65,65 +55,65 @@ paths:
           description: Server Error
 
 
-    post:
-      tags:
-        - Seat
-      parameters:
-        - name: model_id
-          in: path
-          type: string
-          required: true
-        - name: body
-          in: body
-          schema:
-            type: object
-            required:
-              - model_id
-              - seat_name
-              - class
-            properties:
-              model_id:
-                type: string
-              seat_name:
-                type: string
-              class:
-                type: string
-      summary: Add new seat to the model
-      responses:
-        201:
-          description: Created
-        400:
-          description: Bad request
-        401:
-          description: Unauthorized
-        404:
-          description: Not found
-        502:
-          description: Server Error
+#    post:
+#      tags:
+#        - Seat
+#      parameters:
+#        - name: model_id
+#          in: path
+#          type: string
+#          required: true
+#        - name: body
+#          in: body
+#          schema:
+#            type: object
+#            required:
+#              - model_id
+#              - seat_name
+#              - class
+#            properties:
+#              model_id:
+#                type: string
+#              seat_name:
+#                type: string
+#              class:
+#                type: string
+#      summary: Add new seat to the model
+#      responses:
+#        201:
+#          description: Created
+#        400:
+#          description: Bad request
+#        401:
+#          description: Unauthorized
+#        404:
+#          description: Not found
+#        502:
+#          description: Server Error
 
 
-  /seat/{model_id}/{seat_id}:
-    delete:
-      parameters:
-        - name: flight_id
-          in: path
-          type: integer
-          required: true
-        - name: seat_id
-          in: path
-          type: integer
-          required: true
-      tags:
-        - Seat
-      summary: Delete a seat
-      responses:
-        200:
-          description: OK, deleted
-        401:
-          description: Unauthorized
-        404:
-          description: Seat not Found
-        400:
-          description: Bad request
-        502:
-          description: Server Error
+#  /seat/{model_id}/{seat_id}:
+#    delete:
+#      parameters:
+#        - name: flight_id
+#          in: path
+#          type: integer
+#          required: true
+#        - name: seat_id
+#          in: path
+#          type: integer
+#          required: true
+#      tags:
+#        - Seat
+#      summary: Delete a seat
+#      responses:
+#        200:
+#          description: OK, deleted
+#        401:
+#          description: Unauthorized
+#        404:
+#          description: Seat not Found
+#        400:
+#          description: Bad request
+#        502:
+#          description: Server Error

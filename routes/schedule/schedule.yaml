@@ -10,6 +10,11 @@ info:
     such as **bold**, *italic*, and [links](https://swagger.io).
   version: 1.0.0
 host: localhost:3000
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 schemes:
   - http
 paths:
@@ -87,6 +92,8 @@ paths:
     post:
       tags:
         - Schedule
+      security:
+        - ApiKeyAuth: []
       summary: Create a new schedule
       produces:
         - application/json
@@ -122,6 +129,8 @@ paths:
           description: Server Error
   /schedule/{schedule_id}:
     put:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Schedule
       summary: Update a schedule

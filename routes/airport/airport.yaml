@@ -9,12 +9,19 @@ info:
     such as **bold**, *italic*, and [links](https://swagger.io).
   version: 1.0.0
 host: localhost:3000
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 schemes:
   - http
 paths:
   /airport/:
     get:
       summary: Get all airports
+      security:
+        - ApiKeyAuth: []
       tags:
         - Airport
       produces:
@@ -48,6 +55,8 @@ paths:
               token:
                 type: string
     post:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Airport
       summary: Add new airport
@@ -117,6 +126,8 @@ paths:
         502:
           description: Internal Server Error
     put:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Airport
       summary: Update Exsiting airport
@@ -145,7 +156,6 @@ paths:
       responses:
         200:
           description: OK, Updated
-          schema:
         404:
           description: Not found
         400:
@@ -153,6 +163,8 @@ paths:
         502:
           description: Internal Server Error
     delete:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Airport
       parameters:

@@ -4,6 +4,7 @@ let json_response_model = require('../../json_response');  //A function that ret
 const router = require("express").Router();
 const Book_fight = require('../../models/book_fight');
 const Joi_schema = require('../../validation/book_fight_schema');
+const auth = require('../../middleware/auth');
 
 router.get('/', async (req, res) => {
     let book_fight_obj = new Book_fight();

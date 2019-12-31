@@ -2,7 +2,7 @@ let json_response_model = require('../../json_response');  //A function that ret
 const router = require("express").Router();
 const Gate = require('../../models/gate');
 const Joi_schema = require('../../validation/gate_schema');
-
+const auth = require('../../middleware/auth');
 
 router.get('/', async (req, res) => {
     let gate_obj = new Gate();
