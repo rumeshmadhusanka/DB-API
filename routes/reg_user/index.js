@@ -4,14 +4,14 @@ const path = require('path');
 const connection = require("../../db");
 const logger = require("../../logger");
 const RegUser = require('../../models/RegUser');
-const Joi_schema=require('../../validation/book_fight_schema'); 
+const Joi_schema=require('../../validation/reg_user_schema'); 
 
 router.get('/:id', async (req, res) => {
     let id_params = {id:req.params['id']};
     let user = new RegUser();
     let json_response = json_response_model();
     try {
-        await Joi_schema.id_schema.validateAsync(id_params);
+        await Joi_schema.id_check.validateAsync(id_params);
         let results = await user.getUserById(id_params.id);
         let send_results = results[0];
         send_results['password'] = null;
