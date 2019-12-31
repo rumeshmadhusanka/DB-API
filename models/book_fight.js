@@ -44,17 +44,18 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
     }));
 };
 book_fight.prototype.postbookfight = async function (schedule_id, seat_id,user_id) {
-    let query1 = "INSERT INTO `book` ( `date`, `schedule_id`, `seat_id`, `user_id`) VLUES (?,?,?,?)";
+    let query1 = "call add_payment(?,?,?,?)";
     return new Promise(async (resolve, reject) => {
         try {
             let pool = await poolPromise;
             var todaydate = new Date().toISOString().slice(0,10);
-            let result = await pool.query(query1,[todaydate, schedule_id, seat_id,user_id,schedule_id,seat_id,user_id]);
+            let result = await pool.query(query1,[schedule_id, seat_id,user_id,todaydate]);
             resolve(result);
         } catch (e) {
             if(e.sqlState==45000){
                 reject(new ErrorHandler(400, "Seat already booked"));
             }else{ 
+                console.log(e);
                 logger.log(e);
                 reject(new ErrorHandler(502, "Internal Server Error"));
             }
