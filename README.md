@@ -21,6 +21,7 @@
 * Using `Docker`
 * MIT license
 * Git workflow
+* `Grafana` for Realtime Report generation 
 
 ## Prerequisites
 -pm2 ```$ npm i pm2 -g```
