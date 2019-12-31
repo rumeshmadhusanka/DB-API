@@ -74,6 +74,38 @@ paths:
       summary: Update user
       produces:
         - application/json
+      parameters:
+        - in: body
+          name: user
+          description: users details
+          schema:
+            type: object
+            required:
+              - first_name
+              - second_name
+              - email
+              - nic
+              - passport_id
+              - birthday
+              - username
+              - password
+            properties:
+              first_name:
+                type: string
+              second_name:
+                type: string
+              email:
+                type: string
+              nic:
+                type: string
+              passport_id:
+                type: string
+              birthday:
+                type: string
+              username:
+                type: string
+              password:
+                type: string
       responses:
         200:
           description: OK
@@ -200,9 +232,8 @@ paths:
               password:
                 type: string
       responses:
-        201:
-          description: Token created
-
+        200:
+          description: Login Success, Token created
         400:
           description: Bad request
         502:
