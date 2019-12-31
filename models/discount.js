@@ -11,7 +11,8 @@ Discount.prototype.getdiscountbyid= async function(user_id){
         try {
             let pool = await poolPromise;
             let result = await pool.query(query,[user_id]);
-            if (!result.type) {
+            console.log(result[0].type)
+            if (!result[0].type) {
                 reject(new ErrorHandler(404, "No Discount found"));
             } else {
                 resolve(result);
