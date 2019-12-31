@@ -129,6 +129,8 @@ paths:
           description: Server Error
   /schedule/{schedule_id}:
     put:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Schedule
       summary: Update a schedule

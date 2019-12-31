@@ -1,6 +1,6 @@
 module.exports = function (app) {
     app.use("/reg_user", require("./reg_user"));
-    app.use("/book_fight", require("./book_fight"));
+    app.use("/book_flight", require("./book_fight"));
     app.use("/airport", require("./airport"));
     app.use("/booking", require("./booking"));
     app.use("/airplane_model", require("./airplane_model"));

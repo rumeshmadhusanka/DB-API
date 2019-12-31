@@ -148,8 +148,30 @@ router.delete('/:id', (req, res) => {
 //search route
 // passenger/search?name=Kamal
 // access the query param: req.query.name
-router.get('/search', (req, res) => {
+router.get('/:user_id/booking', async (req, res) => {
+    let user_id = req.params.user_id;
+    let user = new RegUser();
+    let json_response = json_response_model();
+    try {
 
+        let results = await user.getBookings(user_id);
+        json_response.success = true;
+        let send_results = results[0];
+        json_response.data.push(send_results);
+        json_response.message = "Success";
+        res.status(200).json(json_response);
+    } catch (e) {
+        json_response.message = e;
+        let code = e.statusCode || 502;
+        if (e._message == null && e.details[0].message) {
+            code = 400;
+            json_response.message = e.details[0].message;
+            res.status(code).json(json_response);
+        } else {
+            res.status(code).json(json_response);
+        }
+        res.status(502).send();
+    }
 });
 
 module.exports = router;
