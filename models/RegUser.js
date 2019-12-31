@@ -26,14 +26,14 @@ RegUser.prototype.getUserById = async function (user_id) {
     }));
 };
 
-RegUser.prototype.addUser =async function (first_name,
-                                      second_name,
-                                      email,
-                                      nic,
-                                      passport_id,
-                                      birthday,
-                                      user_name,
-                                      password) {
+RegUser.prototype.addUser = async function (first_name,
+                                            second_name,
+                                            email,
+                                            nic,
+                                            passport_id,
+                                            birthday,
+                                            user_name,
+                                            password) {
     function getRandomInt(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
@@ -64,14 +64,14 @@ RegUser.prototype.addUser =async function (first_name,
 };
 
 RegUser.prototype.updateUser = async function (user_id,
-                                        first_name,
-                                        second_name,
-                                        email,
-                                        nic,
-                                        passport_id,
-                                        birthday,
-                                        user_name,
-                                        password) {
+                                               first_name,
+                                               second_name,
+                                               email,
+                                               nic,
+                                               passport_id,
+                                               birthday,
+                                               user_name,
+                                               password) {
     let hashedPassword = bcrypt.hashSync(password, 10);
     let query = "call update_user(?,?,?,?,?,?,?,?,?)";
     return new Promise((async (resolve, reject) => {
@@ -87,6 +87,48 @@ RegUser.prototype.updateUser = async function (user_id,
         }
     }));
 };
+
+
+RegUser.prototype.login = async function (email, password) {
+    let query = "select user.user_id,\n" +
+        "       firstName,\n" +
+        "       secondName,\n" +
+        "       email,\n" +
+        "       nic,\n" +
+        "       passport_id,\n" +
+        "       BirthDay,\n" +
+        "       user_type,\n" +
+        "       number_of_bookings,password\n" +
+        "from user\n" +
+        "         inner join registered_user on user.user_id = registered_user.user_id\n" +
+        "where email = ?";
+    return new Promise((async (resolve, reject) => {
+        try {
+            let pool = await poolPromise;
+            let result = await pool.query(query, [email]);
+            //console.log(email, hashedPassword);
+            console.log(result);
+            if (!result.length) {
+                reject(new ErrorHandler(404, "Invalid credentials"));
+            } else {
+                let hashedPassword = result[0].password;
+                //console.log(hashedPassword,password);
+                let isPasswordValid = bcrypt.compareSync(password, hashedPassword);
+
+                if (!isPasswordValid) {
+                    reject(new ErrorHandler(400, "Password Mismatch"));
+                } else {
+                    resolve(result);
+                }
+            }
+        } catch (e) {
+            console.log(e);
+            logger.log(e);
+            reject(new ErrorHandler(502, "Internal Server Error"));
+        }
+    }));
+};
+
 
 RegUser.prototype.deleteUser = function () {
 
