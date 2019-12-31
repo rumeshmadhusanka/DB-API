@@ -32,11 +32,11 @@ paths:
         200:
           description: OK
 
-  /seat/{schedule_id}:
+  /seat/free/{schedule_id}:
     get:
       tags:
         - Seat
-      summary: Get all seats in an airplane model by schedule id
+      summary: Get free seats in a schedule by schedule id
       parameters:
         - name: schedule_id
           in: path
