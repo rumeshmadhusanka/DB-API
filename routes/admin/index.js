@@ -13,7 +13,6 @@ router.post('/login', async (req, res) => {
     let admin = new Admin();
     let json_response = json_response_model();
     try {
-
         let results = await admin.login(email, password);
         json_response.success = true;
         let send_results = results[0];

@@ -6,6 +6,7 @@ function book_fight() {
 
 }
 book_fight.prototype.getallfights = async function () {
+    // WHERE `date`> CURDATE()
     let query1 = "SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate.name FROM(SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate_id FROM `schedule` NATURAL JOIN flight_details)ab NATURAL JOIN gate WHERE `date`> CURDATE()";
     return new Promise((async (resolve, reject) => {
         try {
@@ -43,7 +44,7 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
     }));
 };
 book_fight.prototype.postbookfight = async function (schedule_id, seat_id,user_id) {
-    let query1 = "INSERT INTO `book` ( `date`, `schedule_id`, `seat_id`, `user_id`,`payment`) VLUES (?,?,?,?,SELECT get_discount_seat(?,?,?))";
+    let query1 = "INSERT INTO `book` ( `date`, `schedule_id`, `seat_id`, `user_id`) VLUES (?,?,?,?)";
     return new Promise(async (resolve, reject) => {
         try {
             let pool = await poolPromise;
@@ -95,3 +96,9 @@ book_fight.prototype.deletebooked=async function(schedule_id,user_id){
     });
 };
 module.exports = book_fight;
+// set @seat_price=(SELECT `seat_price` FROM `seat_details_according_to_schedule` where seat_details_according_to_schedule.schedule_id=NEW.schedule_id and seat_details_according_to_schedule.seat_id= NEW.seat_id);
+// set @discount=(SELECT percentage FROM `discount_percentage`LEFT join user on discount_percentage.type = user.user_type WHERE user.user_id= NEW.user_id);
+// IF @discount IS NOT null THEN
+//     set @seat_price= ((100-@discount)*@seat_price)/100;
+// end if;
+// UPDATE book SET payment = @seat_price WHERE schedule_id=NEW.schedule_id and user_id=NEW.user_id;
