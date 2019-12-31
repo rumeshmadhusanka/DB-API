@@ -25,17 +25,17 @@ router.get('/',async(req,res)=>{
         }
     }
 });
-router.get('/:schedule_id',async(req,res)=>{
-    let seat_obj = new Seat(); 
-    let schedule_id=req.params["schedule_id"];
-    let json_response=json_response_model();
+router.get('/free/:schedule_id', async (req, res) => {
+    let seat_obj = new Seat();
+    let schedule_id = req.params["schedule_id"];
+    let json_response = json_response_model();
     try {
         await Joi_schema.schedule_id_check.validateAsync({schedule_id});
-        json_response.data= await seat_obj.getfreeseatbyid(schedule_id);
+        json_response.data = await seat_obj.getfreeseatbyid(schedule_id);
         json_response.success = true;
         res.status(200).json(json_response);
     } catch (e) {
-        json_response.message =  e;
+        json_response.message = e;
         let code = e.statusCode || 502;  
         if (e._message==null && e.details[0].message ){
             code=400;
