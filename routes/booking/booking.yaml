@@ -12,6 +12,11 @@ info:
 host: localhost:3000
 schemes:
   - http
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 paths:
   /booking:
     get:
@@ -66,6 +71,8 @@ paths:
           description: Server Error
   /book_flight/{schedule_id}:
     post:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Booking
       parameters:
