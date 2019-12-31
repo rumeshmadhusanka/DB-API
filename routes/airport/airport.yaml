@@ -9,12 +9,19 @@ info:
     such as **bold**, *italic*, and [links](https://swagger.io).
   version: 1.0.0
 host: localhost:3000
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 schemes:
   - http
 paths:
   /airport/:
     get:
       summary: Get all airports
+      security:
+        - ApiKeyAuth: []
       tags:
         - Airport
       produces:
@@ -48,6 +55,8 @@ paths:
               token:
                 type: string
     post:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Airport
       summary: Add new airport
