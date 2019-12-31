@@ -4,7 +4,7 @@ let json_response_model = require('../../json_response');  //A function that ret
 const router = require("express").Router();
 Location= require('../../models/location');
 const Joi_schema = require('../../validation/location_schema');
-
+const auth = require('../../middleware/auth');
 
 router.get('/', async (req, res) => {
     let location_obj = new Location();

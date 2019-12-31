@@ -8,6 +8,7 @@ const Joi_schema=require('../../validation/reg_user_schema');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../env.config.json'), 'utf8'));
+const auth = require('../../middleware/auth');
 
 router.get('/:id', async (req, res) => {
     let id_params = {id: req.params['id']};

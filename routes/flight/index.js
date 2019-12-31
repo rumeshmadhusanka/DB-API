@@ -2,7 +2,7 @@ let json_response_model = require('../../json_response');  //A function that ret
 const router = require("express").Router();
 const Flight = require('../../models/flight');
 const Joi_schema = require('../../validation/flight_schema');
-
+const auth = require('../../middleware/auth');
 
 router.get('/', async (req, res) => {
     let flight_obj = new Flight();

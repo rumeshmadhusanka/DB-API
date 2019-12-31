@@ -2,9 +2,9 @@ let json_response_model = require('../../json_response');  //A function that ret
 const router = require("express").Router();
 const Airport = require('../../models/airport');
 const Joi_schema = require('../../validation/airport_schema');
+const auth = require('../../middleware/auth');
 
-
-router.get('/', async (req, res) => {
+router.get('/', auth.verifyUser, auth.isAdmin, async (req, res) => {
     let airport_obj = new Airport();
     let json_response = json_response_model();
     try {
@@ -18,16 +18,17 @@ router.get('/', async (req, res) => {
     }
 
 });
-router.post('/',async(req,res)=>{
+router.post('/', auth.verifyUser, auth.isAdmin, async (req, res) => {
     let airport_obj = new Airport();
     let json_response = json_response_model();
-    let airport_req={location_id:req.body.location_id,
-        name:req.body.name,
-        code:req.body.code,
+    let airport_req = {
+        location_id: req.body.location_id,
+        name: req.body.name,
+        code: req.body.code,
     };
     try {
         await Joi_schema.airport_post.validateAsync(airport_req);
-        json_response.data=await airport_obj.addairport(airport_req);
+        json_response.data = await airport_obj.addairport(airport_req);
         json_response.success = true;
         json_response.message = "Successfully added";
         res.status(201).json(json_response);
@@ -64,14 +65,14 @@ router.get('/:airport_id',async(req,res)=>{
         }
     }
 });
-router.put('/:airport_id',async(req,res)=>{ 
+router.put('/:airport_id', auth.verifyUser, auth.isAdmin, async (req, res) => {
     let airport_obj = new Airport();
     let json_response = json_response_model();
-    let airport_req={
-        airport_id:parseInt(req.params['airport_id'],10),
-        location_id:req.body.location_id,
-        name:req.body.name,
-        code:req.body.code,
+    let airport_req = {
+        airport_id: parseInt(req.params['airport_id'], 10),
+        location_id: req.body.location_id,
+        name: req.body.name,
+        code: req.body.code,
     };
     try {
         await Joi_schema.airport_put.validateAsync(airport_req);
@@ -91,15 +92,15 @@ router.put('/:airport_id',async(req,res)=>{
             }
     } 
 });
-router.delete('/:airport_id',async(req,res)=>{
-    let airport_id=req.params['airport_id'];
-    let airport_obj=new Airport();
+router.delete('/:airport_id', auth.verifyUser, auth.isAdmin, async (req, res) => {
+    let airport_id = req.params['airport_id'];
+    let airport_obj = new Airport();
     let json_response = json_response_model();
     try {
         await Joi_schema.airport_id_check.validateAsync({airport_id});
-        json_response.data=await airport_obj.deleteairport(airport_id);
-        json_response.success=true;
-        json_response.message="Airport was deleted!!";
+        json_response.data = await airport_obj.deleteairport(airport_id);
+        json_response.success = true;
+        json_response.message = "Airport was deleted!!";
         res.status(200).json(json_response);
     } catch (e) {
         json_response.message =  e;
