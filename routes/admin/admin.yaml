@@ -1,0 +1,48 @@
+swagger: "2.0"
+info:
+  title: Airline API
+  description: A detailed description of the operation.
+    Use markdown for rich text representation,
+    such as **bold**, *italic*, and [links](https://swagger.io).
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+tags:
+  - name: Admin
+    description: Admin Login
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
+paths:
+  /admin/login:
+    post:
+      tags:
+        - Admin
+      summary: Admin login, retuns the token in header
+      consumes:
+        - application/json
+      parameters:
+        - name: data
+          in: body
+          schema:
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Credentials
+        404:
+          description: Not Found
+        502:
+          description: Server Error
+
