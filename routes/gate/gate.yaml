@@ -9,11 +9,18 @@ info:
     such as **bold**, *italic*, and [links](https://swagger.io).
   version: 1.0.0
 host: localhost:3000
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 schemes:
   - http
 paths:
   /gate/:
     get:
+      security:
+        - ApiKeyAuth: []
       summary: Get all gates
       tags:
         - Gate
@@ -47,6 +54,8 @@ paths:
         502:
           description: Internal Server Error
     post:
+      security:
+        - ApiKeyAuth: []
       summary: Add new gate to an airport
       tags:
         - Gate
@@ -74,6 +83,8 @@ paths:
           description: Internal Server Error
   /gate/{gate_id}:
     get:
+      security:
+        - ApiKeyAuth: []
       summary: Get gate by id
       tags:
         - Gate
@@ -114,6 +125,8 @@ paths:
         502:
           description: Internal Server Error
     put:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Gate
       summary: Update Gate
@@ -146,6 +159,8 @@ paths:
         502:
           description: Internal Server Error
     delete:
+      security:
+        - ApiKeyAuth: []
       tags:
         - Gate
       parameters:
