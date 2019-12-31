@@ -5,12 +5,12 @@ const Joi_schema = require('../../validation/seat_schema');
 
 router.get('/',async(req,res)=>{
     let seat_obj = new Seat(); 
-    const {model_id, anotherField} = req.query;
+    const {schedule_id, anotherField} = req.query;
     // let model_id=req.params["model_id"];
     let json_response=json_response_model();
     try {
-        await Joi_schema.model_id_check.validateAsync({model_id});
-        json_response.data= await seat_obj.getseatbyid(model_id);
+        await Joi_schema.schedule_id_check.validateAsync({schedule_id});
+        json_response.data= await seat_obj.getseatbyid(schedule_id);
         json_response.success = true;
         res.status(200).json(json_response);
     } catch (e) {

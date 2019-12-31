@@ -5,12 +5,12 @@ const logger = require('../logger');
 function Seat() {
 }
 //getlocation function eke wada thiyei
-Seat.prototype.getseatbyid=async function(model_id){
-    let query="select * from seat where model_id=?";
+Seat.prototype.getseatbyid=async function(schedule_id){
+    let query="SELECT * FROM `seat_details_according_to_schedule` where schedule_id=?";
         return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
-            let result=await pool.query(query,[model_id]);
+            let result=await pool.query(query,[schedule_id]);
             if (!result.length){
                 reject(new ErrorHandler(404, "No seat found"));
             }else{
