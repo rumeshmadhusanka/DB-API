@@ -10,9 +10,12 @@ const reg_user_schema = Joi.object().keys({
     username: Joi.string().alphanum().min(3).max(100).required(),
     passport_id :Joi.string().alphanum().min(3).max(30).required(),
 });
-
+const log_in_schema =Joi.object().keys({
+    email: Joi.string().email().max(256).required(),
+    passport_id :Joi.string().alphanum().min(3).max(30).required(),
+});
 const id_check=Joi.object().keys({
-    id:Joi.number().integer().required()
+    id:Joi.number().integer().required(),
 });
 // reg_user_schema,
-module.exports={id_check,reg_user_schema} 
+module.exports={id_check,reg_user_schema,log_in_schema} 

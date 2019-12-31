@@ -48,6 +48,7 @@ router.post('/', async(req, res) => {
     let user = new RegUser();
     let json_response = json_response_model();
     try {
+        await Joi_schema.reg_user_schema.validateAsync({first_name,second_name,email,nic,passport_id,birthday,username,password});
         console.log(first_name, second_name, email, nic, passport_id, birthday, username, password);
         let results = await user.addUser(first_name, second_name, email, nic, passport_id, birthday, username, password);
         json_response.success = true;
@@ -76,7 +77,7 @@ router.post('/login', async (req, res) => {
     let user = new RegUser();
     let json_response = json_response_model();
     try {
-
+        await Joi_schema.log_in_schema.validateAsync({email,password});
         let results = await user.login(email, password);
         json_response.success = true;
         let send_results = results[0];
@@ -103,13 +104,8 @@ router.post('/login', async (req, res) => {
     }
 });
 
-<<<<<<< HEAD
-router.put('/:id',async (req, res) => {
-    let user_id=req.params["id"];
-=======
 router.put('/:id', async (req, res) => {
     let user_id = req.params["id"];
->>>>>>> d7f6b337252078431094ddace827ba71edd6014c
     let first_name = req.body.first_name;
     let second_name = req.body.second_name;
     let email = req.body.email;
@@ -121,8 +117,10 @@ router.put('/:id', async (req, res) => {
 
     let user = new RegUser();
     let json_response = json_response_model();
-    try {
+    try {        
         console.log(user_id,first_name, second_name, email, nic, passport_id, birthday, username, password);
+        await Joi_schema.reg_user_schema.validateAsync({first_name,second_name,email,nic,passport_id,birthday,username,password});
+        await Joi_schema.id_check.validateAsync({user_id})
         let results = await user.updateUser(user_id,first_name, second_name, email, nic, passport_id, birthday, username, password);
         json_response.success = true;
         let send_results = results[0];
