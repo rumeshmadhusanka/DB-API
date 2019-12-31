@@ -9,11 +9,18 @@ info:
     such as **bold**, *italic*, and [links](https://swagger.io).
   version: 1.0.0
 host: localhost:3000
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    in: header
+    name: x-access-token
 schemes:
   - http
 paths:
   /airplane:
     get:
+      security:
+        - ApiKeyAuth: []
       summary: Get all airplanes
       tags:
         - Airplane
@@ -46,6 +53,8 @@ paths:
         502:
           description: Internal Server Error
     post:
+      security:
+        - ApiKeyAuth: []
       summary: Add new Airplane
       tags:
         - Airplane

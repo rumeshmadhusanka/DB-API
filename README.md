@@ -1,40 +1,48 @@
-# Software Engineering Project Back-end API
+# Airline Reservation System REST API
+![logo](db%20api.jpg)
 
-###Deployment 
-https://software-engi.herokuapp.com/
+## Features
+* Triggers
+* Functions
+* Views
+* Stored procedures
+* Using transactions where necessary
 
-System Architecture Document
-https://docs.google.com/document/d/1br3VXRLCZ9pewrxHVNTTnKmoyK74qNNXEE7DNkahrDU/edit
-![alt text](public/images/DB%20schema%20design.png)
-_GET customer/:id_
 
-{
-    "success": true,
-    "error_code": "",
-    "message": "Affected Rows: 1",
-    "data": [
-        {
-            "id": 1,
-            "first_name": "Kamal",
-            "last_name": "Fernando",
-            "email": "kamal@gmail.com",
-            "contact_no": "0786564786"
-        }
-    ],
-    "token": ""
-}
+* Node Express REST api
+* Using promises
+* Documentation with `Swagger`(Open API 2.0)
+* Centralized error handling
+* Proper use of modules
+* Passwords hashed using `bcrypt`
+* Authentication with jwt
+* Validation using `joi`
+* Load balancing using `pm2` process management
+* Using `Docker`
+* MIT license
+* Git workflow
+* `Grafana` for Realtime Report generation 
 
-_POST customer_
+## Prerequisites
+-pm2 ```$ npm i pm2 -g```
 
-{
-	"first_name":"Amal",
-	"last_name":"Rathnayake",
-	"email":"amal@gmail.com",
-	"contact_no":"0786567654",
-	"password":"uvh dvfvrtgbtgbhtbb hdbhb f"
-}
+-nodemon ```$ npm i nodemon -g```
 
-_PUT customer/:id_
+## Install
+```
+$ npm install 
+```
 
-_DELETE customer/:id_
+## Quick Start
 
+-Run the project- ```$ npm start```
+
+## Authors
+
+-[Rumesh Madhusanka](https://github.com/rumeshmadhusanka)
+
+-[Kushan Chamindu](https://github.com/KushanChamindu)
+
+-[Shashimal Senarath](https://github.com/shashimalcse)
+
+-[Jayampathi Adhikari](https://github.com/jayampathiadhikari)

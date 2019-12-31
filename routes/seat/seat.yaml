@@ -24,7 +24,7 @@ paths:
         - Seat
       summary: has a query param
       parameters:
-        - name: model_id
+        - name: schedule_id
           type: string
           in: query
           required: true
