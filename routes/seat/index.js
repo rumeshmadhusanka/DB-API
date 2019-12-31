@@ -25,9 +25,9 @@ router.get('/',async(req,res)=>{
         }
     }
 });
-router.get('/free/:schedule_id', async (req, res) => {
+router.get('/free', async (req, res) => {
     let seat_obj = new Seat();
-    let schedule_id = req.params["schedule_id"];
+    let schedule_id = req.query["schedule_id"];
     let json_response = json_response_model();
     try {
         await Joi_schema.schedule_id_check.validateAsync({schedule_id});

@@ -32,14 +32,14 @@ paths:
         200:
           description: OK
 
-  /seat/free/{schedule_id}:
+  /seat/free:
     get:
       tags:
         - Seat
       summary: Get free seats in a schedule by schedule id
       parameters:
         - name: schedule_id
-          in: path
+          in: query
           type: string
           required: true
       produces:
