@@ -83,9 +83,11 @@ router.post('/login', async (req, res) => {
         json_response.success = true;
         let send_results = results[0];
         let user_id = send_results["user_id"];
+        send_results['password'] = null;
         //console.log(send_results);
         //console.log();
         json_response.message = "Login Success";
+        json_response.data.push(send_results);
         let token = jwt.sign({"user_id": user_id}, config.secret, config.options);
         res.header('x-access-token', token).status(200).json(json_response);
     } catch (e) {
