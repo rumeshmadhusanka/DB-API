@@ -4,7 +4,7 @@ const Airport = require('../../models/airport');
 const Joi_schema = require('../../validation/airport_schema');
 const auth = require('../../middleware/auth');
 
-router.get('/', auth.verifyUser, auth.isAdmin, async (req, res) => {
+router.get('/', async (req, res) => {
     let airport_obj = new Airport();
     let json_response = json_response_model();
     try {

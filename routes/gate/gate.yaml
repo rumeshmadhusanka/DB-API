@@ -176,3 +176,22 @@ paths:
           description: Not found
         502:
           description: Internal Server Error
+  /flight_id/{flight_id}:
+    get:
+      tags:
+        - Gate
+      parameters:
+        - name: flight_id
+          in: path
+          required: true
+          type: number
+
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not Found
+        502:
+          description: Server Error
+              
+        
