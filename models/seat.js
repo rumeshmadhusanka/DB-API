@@ -24,7 +24,7 @@ Seat.prototype.getseatbyid=async function(schedule_id){
 }
 Seat.prototype.getfreeseatbyid=async function(schedule_id){
     // let query="select * from seat where model_id=?";
-    let query = "SELECT a.seat_id,a.seat_name,a.seat_class,a.seat_price FROM (SELECT seat_id,seat_name,seat_class,seat_price from `seat_details_according_to_schedule` where schedule_id=?)a WHERE seat_id not in (SELECT seat_id from book WHERE schedule_id=?)"
+    let query = "SELECT a.seat_id,a.seat_name,a.class,a.price FROM(SELECT seat_id,seat_name,class,price FROM `seat_details_according_to_schedule` WHERE schedule_id = ?) a WHERE seat_id NOT IN(SELECT seat_id FROM book WHERE schedule_id = ?)"
     return new Promise(async(resolve,reject)=>{
         try {
             let pool = await poolPromise;
