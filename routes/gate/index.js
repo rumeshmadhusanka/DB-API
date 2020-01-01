@@ -64,6 +64,27 @@ router.get('/:gate_id',async(req,res)=>{
         }
     }
 });
+router.get('/flight_id/:flight_id',async(req,res)=>{
+    let gate_obj = new Gate(); 
+    let flight_id=req.params["flight_id"];
+    let json_response=json_response_model();
+    try {
+        await Joi_schema.flight_id_check.validateAsync({flight_id});
+        json_response.data= await gate_obj.getflightbyid(flight_id);
+        json_response.success = true;
+        res.status(200).json(json_response);
+    } catch (e) {
+        json_response.message =  e;
+        let code = e.statusCode || 502;  
+        if (e._message==null && e.details[0].message ){
+            code=400;
+            json_response.message =  e.details[0].message;
+            res.status(code).json(json_response);
+        }else{
+            res.status(code).json(json_response);
+        }
+    }
+});
 router.put('/:gate_id',async(req,res)=>{ 
     let gate_obj = new Gate();
     let json_response = json_response_model();

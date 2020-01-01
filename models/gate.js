@@ -58,6 +58,24 @@ Gate.prototype.getgatebyid=async function(gate_id){
         }
     });
 }
+Gate.prototype.getflightbyid=async function(flight_id){
+    let query="call get_gate_id_for_given_flight_id(?)";
+    return new Promise(async(resolve,reject)=>{
+        try {
+            let pool = await poolPromise;
+            let result=await pool.query(query,[flight_id]);
+            // console.log(result[0])
+            if (!result[0].length) {
+                reject(new ErrorHandler(404, "No gate found"));
+            } else {
+                resolve(result[0]);
+            }
+        } catch (e) {
+            logger.log(e);
+            reject(new ErrorHandler(502, "Internal Server Error"));
+        }
+    });
+}
 Gate.prototype.updategate=async function(gate_req){
     let query= "update `gate` set airport_id=?,name=? where gate_id=?";
     return new Promise(async(resolve,reject)=>{
