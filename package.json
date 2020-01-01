@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon -e yaml,js,json index.js",
-    "start": "pm2 start process.yaml;pm2 monit",
+    "start": "npm start",
     "stop": "pm2 delete db-backend",
     "test": "mocha --recursive"
   },
