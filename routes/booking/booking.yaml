@@ -86,14 +86,25 @@ paths:
             required:
               - seat_id
               - user_id
+              - first_name
+              - last_name
+              - birthday
+              - passport_id
             properties:
               seat_id:
                 type: number
               user_id:
                 type: number
+              first_name:
+                type: string
+              last_name:
+                type: string
+              birthday:
+                type: string
+              passport_id:
+                type: string
       consumes:
         - application/json
       responses:
         200:
           description: OK
-          schema:

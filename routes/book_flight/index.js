@@ -72,12 +72,16 @@ router.post('/:schedule_id', async (req, res) => {
     // let schedule_id=req.body.schedule_id;
     let seat_id = req.body.seat_id;
     let user_id = req.body.user_id;
-    let post_data = {schedule_id, seat_id, user_id};
+    let first_name = req.body.first_name;
+    let last_name = req.body.last_name;
+    let birthday = req.body.birthday;
+    let passport_id = req.body.passport_id;
+    let post_data = {schedule_id, seat_id, user_id, first_name, last_name, birthday, passport_id};
     let json_response = json_response_model();
     let book_fight_obj = new Book_fight();
     try {
-        await Joi_schema.booke_fight_post_schema.validateAsync(post_data);
-        let results = await book_fight_obj.postbookfight(schedule_id, seat_id, user_id);
+        await Joi_schema.book_fight_post_schema.validateAsync(post_data);
+        let results = await book_fight_obj.postbookfight(schedule_id, seat_id, user_id, first_name, last_name, birthday, passport_id);
         json_response.data.push(results[0]);
         json_response.success = true;
         json_response.message = "Successfully booked";

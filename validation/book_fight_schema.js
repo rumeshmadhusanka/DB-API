@@ -12,10 +12,14 @@ const query_string = Joi.object().keys({
         seat_id:Joi.number().integer().required(),
     });
 
-const booke_fight_post_schema = Joi.object().keys({
+const book_fight_post_schema = Joi.object().keys({
     user_id: Joi.number().integer().required(),
-    seat_id:Joi.number().integer().required(),
-    schedule_id:Joi.number().integer().required(),
+    first_name: Joi.string().min(3).max(30).required(),
+    last_name: Joi.string().min(3).max(30).required(),
+    birthday: Joi.date().min('1-1-1900').iso().required(),
+    passport_id: Joi.string().alphanum().min(3).max(30).required(),
+    seat_id: Joi.number().integer().required(),
+    schedule_id: Joi.number().integer().required(),
 });
 
 const query_string_delete_req = Joi.object().keys({
@@ -26,9 +30,9 @@ const query_string_delete_req = Joi.object().keys({
 const id_schema=Joi.object().keys({
     id:Joi.number().integer().required()
 });
-module.exports={
+module.exports= {
     id_schema,
     query_string,
-    booke_fight_post_schema,
+    book_fight_post_schema,
     query_string_delete_req
 }

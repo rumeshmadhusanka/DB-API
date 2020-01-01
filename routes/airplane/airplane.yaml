@@ -69,7 +69,8 @@ paths:
               - model_id
             properties:
               model_id:
-                type: number
+                type: string
+                example: "0001"
       responses:
         201:
           description: Created
