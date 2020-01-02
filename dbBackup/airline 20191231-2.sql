@@ -966,7 +966,8 @@ BEGIN
     SELECT `route_id`
     INTO id1
     FROM `route`
-    WHERE route.origin = NEW.origin and route.destination = NEW.destination
+    WHERE route.origin = NEW.origin
+      and route.destination = NEW.destination
     LIMIT 1;
     IF id1 is not NULL THEN
         SIGNAL SQLSTATE '45000';

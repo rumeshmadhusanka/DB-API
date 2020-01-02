@@ -31,16 +31,16 @@ router.post('/', auth.verifyUser, auth.isAdmin, async (req, res) => {
         json_response.message = "Model successfully added";
         res.status(201).json(json_response);
     } catch (e) {
-        json_response.message =  e;
-            let code = e.statusCode || 502;  
-            if (e._message==null && e.details[0].message ){
-                code=400;
-                json_response.message =  e.details[0].message;
-                res.status(code).json(json_response);
-            }else{
-                res.status(code).json(json_response);
-            }
-    } 
+        json_response.message = e;
+        let code = e.statusCode || 502;
+        if (e._message == null && e.details[0].message) {
+            code = 400;
+            json_response.message = e.details[0].message;
+            res.status(code).json(json_response);
+        } else {
+            res.status(code).json(json_response);
+        }
+    }
 });
 router.delete('/:model_id', auth.verifyUser, auth.isAdmin, async (req, res) => {
     let model_id = req.params['model_id'];
@@ -53,15 +53,15 @@ router.delete('/:model_id', auth.verifyUser, auth.isAdmin, async (req, res) => {
         json_response.message = "Airplane model was deleted!!";
         res.status(200).json(json_response);
     } catch (e) {
-        json_response.message =  e;
-            let code = e.statusCode || 502;  
-            if (e._message==null && e.details[0].message ){
-                code=400;
-                json_response.message =  e.details[0].message;
-                res.status(code).json(json_response);
-            }else{
-                res.status(code).json(json_response);
-            }
-    } 
+        json_response.message = e;
+        let code = e.statusCode || 502;
+        if (e._message == null && e.details[0].message) {
+            code = 400;
+            json_response.message = e.details[0].message;
+            res.status(code).json(json_response);
+        } else {
+            res.status(code).json(json_response);
+        }
+    }
 });
-module.exports=router;
+module.exports = router;

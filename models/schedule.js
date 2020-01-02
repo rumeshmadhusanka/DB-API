@@ -5,6 +5,7 @@ const logger = require('../logger');
 function Schedule() {
 
 }
+
 Schedule.prototype.getAllSchedules = async function () {
     let query = "call get_all_schedules()";
     return new Promise(async (resolve, reject) => {

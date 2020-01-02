@@ -5,9 +5,10 @@ const logger = require('../logger');
 function Discount() {
 
 }
-Discount.prototype.getdiscountbyid= async function(user_id){
-    let query="SELECT user.user_id,discount_percentage.type,discount_percentage.percentage FROM `user` LEFT JOIN discount_percentage on user.user_type= discount_percentage.type WHERE user.user_id=?";
-    return new Promise(async(resolve,reject)=>{
+
+Discount.prototype.getdiscountbyid = async function (user_id) {
+    let query = "SELECT user.user_id,discount_percentage.type,discount_percentage.percentage FROM `user` LEFT JOIN discount_percentage on user.user_type= discount_percentage.type WHERE user.user_id=?";
+    return new Promise(async (resolve, reject) => {
         try {
             let pool = await poolPromise;
             let result = await pool.query(query, [user_id]);
@@ -23,4 +24,4 @@ Discount.prototype.getdiscountbyid= async function(user_id){
         }
     });
 }
-module.exports=Discount;
+module.exports = Discount;

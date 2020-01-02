@@ -4,7 +4,7 @@ const path = require('path');
 const connection = require("../../db");
 const logger = require("../../logger");
 const RegUser = require('../../models/RegUser');
-const Joi_schema=require('../../validation/reg_user_schema'); 
+const Joi_schema = require('../../validation/reg_user_schema');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../env.config.json'), 'utf8'));
@@ -23,20 +23,20 @@ router.get('/:id', async (req, res) => {
         json_response.data.push(send_results);
         res.status(200).json(json_response);
     } catch (e) {
-        json_response.message =  e;
-        let code = e.statusCode || 502;  
-        if (e._message==null && e.details[0].message ){
-            code=400;
-            json_response.message =  e.details[0].message;
+        json_response.message = e;
+        let code = e.statusCode || 502;
+        if (e._message == null && e.details[0].message) {
+            code = 400;
+            json_response.message = e.details[0].message;
             res.status(code).json(json_response);
-        }else{
+        } else {
             res.status(code).json(json_response);
-        }  
+        }
     }
 });
 
 //Sign in route
-router.post('/', async(req, res) => {
+router.post('/', async (req, res) => {
     let first_name = req.body.first_name;
     let second_name = req.body.second_name;
     let email = req.body.email;
@@ -49,7 +49,16 @@ router.post('/', async(req, res) => {
     let user = new RegUser();
     let json_response = json_response_model();
     try {
-        await Joi_schema.reg_user_schema.validateAsync({first_name,second_name,email,nic,passport_id,birthday,username,password});
+        await Joi_schema.reg_user_schema.validateAsync({
+            first_name,
+            second_name,
+            email,
+            nic,
+            passport_id,
+            birthday,
+            username,
+            password
+        });
         console.log(first_name, second_name, email, nic, passport_id, birthday, username, password);
         let results = await user.addUser(first_name, second_name, email, nic, passport_id, birthday, username, password);
         json_response.success = true;
@@ -78,7 +87,7 @@ router.post('/login', async (req, res) => {
     let user = new RegUser();
     let json_response = json_response_model();
     try {
-        await Joi_schema.log_in_schema.validateAsync({email,password});
+        await Joi_schema.log_in_schema.validateAsync({email, password});
         let results = await user.login(email, password);
         json_response.success = true;
         let send_results = results[0];
@@ -120,11 +129,20 @@ router.put('/:id', async (req, res) => {
 
     let user = new RegUser();
     let json_response = json_response_model();
-    try {        
-        console.log(user_id,first_name, second_name, email, nic, passport_id, birthday, username, password);
-        await Joi_schema.reg_user_schema.validateAsync({first_name,second_name,email,nic,passport_id,birthday,username,password});
+    try {
+        console.log(user_id, first_name, second_name, email, nic, passport_id, birthday, username, password);
+        await Joi_schema.reg_user_schema.validateAsync({
+            first_name,
+            second_name,
+            email,
+            nic,
+            passport_id,
+            birthday,
+            username,
+            password
+        });
         await Joi_schema.id_check.validateAsync({user_id})
-        let results = await user.updateUser(user_id,first_name, second_name, email, nic, passport_id, birthday, username, password);
+        let results = await user.updateUser(user_id, first_name, second_name, email, nic, passport_id, birthday, username, password);
         json_response.success = true;
         let send_results = results[0];
         json_response.message = "Successfully Updated " + first_name;
