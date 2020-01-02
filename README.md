@@ -24,13 +24,13 @@
 * `Grafana` for Realtime Report generation 
 
 ## Prerequisites
-- pm2 ```$ npm i pm2 -g```
+- pm2 ```> npm i pm2 -g```
 
-- nodemon ```$ npm i nodemon -g```
+- nodemon ```> npm i nodemon -g```
 
 ## Install
 ```
-$ npm install 
+> npm install 
 ```
 
 ## Quick Start
@@ -39,11 +39,9 @@ $ npm install
 
 - Add your database credentials to **db.conf.json**
 
-- Run the project in dev mode with `nodemon`- ```npm run dev```
+- Run the project in dev mode with `nodemon`- ```> npm run dev``` **OR**  with node- ```> npm start```
 
-- Run the project- ```$ npm start```
-
-- Install Grafana and import the dashboards
+- Install [Grafana](https://grafana.com/) and import the dashboards
 
 
 ## Authors
