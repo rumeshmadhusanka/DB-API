@@ -16,7 +16,7 @@
 * Centralized error handling
 * Passwords hashed using `bcrypt`
 * Authentication with jwt
-* User input validation using `joi`
+* User input validation using `hapi/joi`
 * Uses `promise-mysql` and connection pooling
 * Load balancing using `pm2` process management
 * Using `Docker`
