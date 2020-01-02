@@ -43,6 +43,8 @@ $ npm install
 
 - Run the project- ```$ npm start```
 
+- Install Grafana and import the dashboards
+
 
 ## Authors
 
