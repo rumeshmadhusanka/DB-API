@@ -4,9 +4,10 @@ const logger = require('../logger');
 
 function Airplane() {
 }
-Airplane.prototype.getallairplane= async function(){
-    let query="SELECT airplane_id,airplane_model.model_name FROM `airplane` NATURAL JOIN airplane_model";
-    return new Promise(async(resolve,reject)=>{
+
+Airplane.prototype.getallairplane = async function () {
+    let query = "SELECT airplane_id,airplane_model.model_name FROM `airplane` NATURAL JOIN airplane_model";
+    return new Promise(async (resolve, reject) => {
         try {
             let pool = await poolPromise;
             let result = await pool.query(query);
@@ -21,17 +22,17 @@ Airplane.prototype.getallairplane= async function(){
         }
     });
 }
-Airplane.prototype.addairplane=async function(airplane_req){
-    let query= "INSERT INTO `airplane` (model_id) VALUES (?)";
-    return new Promise(async(resolve,reject)=>{
+Airplane.prototype.addairplane = async function (airplane_req) {
+    let query = "INSERT INTO `airplane` (model_id) VALUES (?)";
+    return new Promise(async (resolve, reject) => {
         try {
             let pool = await poolPromise;
-            let result = await pool.query(query,[airplane_req.model_id]);
+            let result = await pool.query(query, [airplane_req.model_id]);
             resolve(result);
         } catch (e) {
-            if(e.sqlState==23000){ 
+            if (e.sqlState == 23000) {
                 reject(new ErrorHandler(404, "No airplane model found"));
-            }else{
+            } else {
                 logger.log(e);
                 console.log(e);
                 reject(new ErrorHandler(502, "Internal Server Error"));
@@ -39,22 +40,22 @@ Airplane.prototype.addairplane=async function(airplane_req){
         }
     });
 }
-Airplane.prototype.deleteairplane=async function(airplane_id){
-    let delete_query="DELETE FROM airplane WHERE airplane_id=?";
-    return new Promise(async(resolve,reject)=>{
-        try{
+Airplane.prototype.deleteairplane = async function (airplane_id) {
+    let delete_query = "DELETE FROM airplane WHERE airplane_id=?";
+    return new Promise(async (resolve, reject) => {
+        try {
             let pool = await poolPromise;
-            let result=await pool.query(delete_query,[airplane_id]); 
-            if(result.affectedRows==0){
+            let result = await pool.query(delete_query, [airplane_id]);
+            if (result.affectedRows == 0) {
                 reject(new ErrorHandler(404, "Airplane not found"));
-            }else if(result.affectedRows==1){
+            } else if (result.affectedRows == 1) {
                 resolve(result);
             }
-        }catch(e){
+        } catch (e) {
             console.log(e);
             logger.log(e);
             reject(new ErrorHandler(502, "Internal Server Error"));
         }
     });
 };
-module.exports=Airplane;
+module.exports = Airplane;

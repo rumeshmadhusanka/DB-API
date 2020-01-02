@@ -34,8 +34,10 @@ paths:
             properties:
               email:
                 type: string
+                example: admin@gmail.com
               password:
                 type: string
+                example: admin
       responses:
         200:
           description: OK

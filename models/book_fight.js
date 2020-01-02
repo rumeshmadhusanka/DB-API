@@ -5,7 +5,9 @@ const logger = require('../logger');
 function book_fight() {
 
 }
+
 book_fight.prototype.getallfights = async function () {
+    // WHERE `date`> CURDATE()
     let query1 = "SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate.name FROM(SELECT `schedule_id`,`date`,origin,destination,model_name,`dep_time`,`arival_time`,gate_id FROM `schedule` NATURAL JOIN flight_details)ab NATURAL JOIN gate WHERE `date`> CURDATE()";
     return new Promise((async (resolve, reject) => {
         try {
@@ -28,9 +30,9 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
     return new Promise((async (resolve, reject) => {
         try {
             let pool = await poolPromise;
-            let result = await pool.query(query1,[schedule_id]);
+            let result = await pool.query(query1, [schedule_id]);
             if (!result.length) {
-                reject(new ErrorHandler(404, "No fight with found shechdule id "+schedule_id));
+                reject(new ErrorHandler(404, "No fight with found shechdule id " + schedule_id));
             } else {
                 resolve(result);
             }
@@ -42,56 +44,71 @@ book_fight.prototype.getfightsbyid = async function (schedule_id) {
 
     }));
 };
-book_fight.prototype.postbookfight = async function (schedule_id, seat_id,user_id) {
-    let query1 = "INSERT INTO `book` ( `date`, `schedule_id`, `seat_id`, `user_id`,`payment`) VLUES (?,?,?,?,SELECT get_discount_seat(?,?,?))";
+book_fight.prototype.postbookfight = async function (schedule_id, seat_id, user_id, first_name, last_name, birthday, passport_id) {
+    let query1 = "call add_payment(?,?,?,?,?,?,?,?,?)";
+
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    let random_id = getRandomInt(10000000, 100000000);
     return new Promise(async (resolve, reject) => {
         try {
             let pool = await poolPromise;
-            var todaydate = new Date().toISOString().slice(0,10);
-            let result = await pool.query(query1,[todaydate, schedule_id, seat_id,user_id,schedule_id,seat_id,user_id]);
+            let todaydate = new Date().toISOString().slice(0, 10);
+            let result = await pool.query(query1, [schedule_id, seat_id, user_id, todaydate, first_name, last_name, birthday, passport_id, random_id]);
             resolve(result);
         } catch (e) {
-            if(e.sqlState==45000){
+            if (e.sqlState === 45000) {
                 reject(new ErrorHandler(400, "Seat already booked"));
-            }else{ 
+            } else {
+                console.log(e);
                 logger.log(e);
                 reject(new ErrorHandler(502, "Internal Server Error"));
             }
         }
     });
 };
-book_fight.prototype.getpriceseat=async function(user_id,seat_id){
-    let price_query="SELECT get_Total_price_with_discount(?,?)";
-    return new Promise(async(resolve,reject)=>{
-        try{
+book_fight.prototype.getpriceseat = async function (user_id, seat_id) {
+    let price_query = "SELECT get_Total_price_with_discount(?,?)";
+    return new Promise(async (resolve, reject) => {
+        try {
             let pool = await poolPromise;
-            let result=await pool.query(price_query,[user_id,seat_id]);
-            if(result[0][Object.keys(result[0])[0]]){
+            let result = await pool.query(price_query, [user_id, seat_id]);
+            if (result[0][Object.keys(result[0])[0]]) {
                 resolve(result);
-            }else{
-               reject(new ErrorHandler(404, "Seat not found"));
+            } else {
+                reject(new ErrorHandler(404, "Seat not found"));
             }
-        }catch(e){
+        } catch (e) {
             logger.log(e);
             reject(new ErrorHandler(502, "Internal Server Error"));
         }
     });
 };
-book_fight.prototype.deletebooked=async function(schedule_id,user_id){
-    let delete_query="DELETE FROM book WHERE schedule_id=? and user_id=?";
-    return new Promise(async(resolve,reject)=>{
-        try{
+book_fight.prototype.deletebooked = async function (schedule_id, user_id) {
+    let delete_query = "DELETE FROM book WHERE schedule_id=? and user_id=?";
+    return new Promise(async (resolve, reject) => {
+        try {
             let pool = await poolPromise;
-            let result=await pool.query(delete_query,[schedule_id,user_id]); 
-            if(result.affectedRows==0){
+            let result = await pool.query(delete_query, [schedule_id, user_id]);
+            if (result.affectedRows == 0) {
                 reject(new ErrorHandler(404, "Seat not found"));
-            }else if(result.affectedRows==1){
+            } else if (result.affectedRows == 1) {
                 resolve(result);
             }
-        }catch(e){
+        } catch (e) {
             logger.log(e);
             reject(new ErrorHandler(502, "Internal Server Error"));
         }
     });
 };
 module.exports = book_fight;
+// set @seat_price=(SELECT `seat_price` FROM `seat_details_according_to_schedule` where seat_details_according_to_schedule.schedule_id=NEW.schedule_id and seat_details_according_to_schedule.seat_id= NEW.seat_id);
+// set @discount=(SELECT percentage FROM `discount_percentage`LEFT join user on discount_percentage.type = user.user_type WHERE user.user_id= NEW.user_id);
+// IF @discount IS NOT null THEN
+//     set @seat_price= ((100-@discount)*@seat_price)/100;
+// end if;
+// UPDATE book SET payment = @seat_price WHERE schedule_id=NEW.schedule_id and user_id=NEW.user_id;

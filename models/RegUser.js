@@ -135,7 +135,7 @@ RegUser.prototype.deleteUser = function () {
 };
 
 RegUser.prototype.getBookings = async function (user_id) {
-    let query = "select book.user_id,passport_id,book.id,book.date from user inner join book on user.user_id = book.user_id inner join schedule  on book.schedule_id = schedule.schedule_id where book.user_id = ?";
+    let query = "select * from user inner join book on user.user_id = book.user_id inner join schedule  on book.schedule_id = schedule.schedule_id inner join schedule_details  on book.schedule_id = schedule_details.schedule_id inner join gate g on schedule.gate_id = g.gate_id where book.user_id = ?";
     return new Promise((async (resolve, reject) => {
         try {
             let pool = await poolPromise;

@@ -25,7 +25,6 @@ Schedule.prototype.getAllSchedules = async function () {
     });
 
 };
-
 Schedule.prototype.getRestrictedSchedules = async function (origin, destination, from_date, to_date) {
     let query = "call get_schedules_filtered(?,?,?,?)";
     return new Promise(async (resolve, reject) => {
@@ -45,7 +44,6 @@ Schedule.prototype.getRestrictedSchedules = async function (origin, destination,
     });
 
 };
-
 Schedule.prototype.createNewSchedule = async function (date, flight_id, dep_time, arrival_time, gate_id) {
     let query = "INSERT INTO  schedule(date, flight_id, dep_time, arival_time, gate_id) values(?,?,?,?,?)";
     return new Promise(async (resolve, reject) => {
@@ -56,6 +54,8 @@ Schedule.prototype.createNewSchedule = async function (date, flight_id, dep_time
         } catch (e) {
             if (e.sqlState === 23000) {
                 reject(new ErrorHandler(404, "Invalid arguments"));
+            } else if (e.sqlState === 45001) {
+                reject(new ErrorHandler(400, "Conflict same flight in same dep,arri time"));
             } else {
                 logger.log(e);
                 console.log(e);
@@ -65,7 +65,6 @@ Schedule.prototype.createNewSchedule = async function (date, flight_id, dep_time
     });
 
 };
-
 Schedule.prototype.updateSchedule = async function (date, flight_id, dep_time, arrival_time, gate_id, schedule_id) {
     //console.log(date, flight_id, dep_time, arrival_time, gate_id,schedule_id);
     let query = "Update schedule set date =?, flight_id=?, dep_time=?, arival_time=?,gate_id = ? where schedule_id=?";
@@ -86,6 +85,4 @@ Schedule.prototype.updateSchedule = async function (date, flight_id, dep_time, a
     });
 
 };
-
-
 module.exports = Schedule;

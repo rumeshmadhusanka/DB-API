@@ -1,8 +1,7 @@
 let json_response_model = require('../../json_response');  //A function that returns the json response format object
 const router = require("express").Router();
 const path = require('path');
-const Admin = require('../../models/Admin');
-const Joi_schema = require('../../validation/book_fight_schema');
+const Admin = require('../../models/admin');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../env.config.json'), 'utf8'));
@@ -13,7 +12,6 @@ router.post('/login', async (req, res) => {
     let admin = new Admin();
     let json_response = json_response_model();
     try {
-
         let results = await admin.login(email, password);
         json_response.success = true;
         let send_results = results[0];

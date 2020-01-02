@@ -238,8 +238,10 @@ paths:
             properties:
               email:
                 type: string
+                example: jaya@gmail.com
               password:
                 type: string
+                example: abc
       responses:
         200:
           description: Login Success, Token created

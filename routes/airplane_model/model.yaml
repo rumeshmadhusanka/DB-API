@@ -69,8 +69,10 @@ paths:
             properties:
               model_name:
                 type: string
+                example: Airbus new model
               model_id:
                 type: string
+                example: 000087
       responses:
         201:
           description: Created
