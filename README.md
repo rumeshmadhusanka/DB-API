@@ -1,11 +1,12 @@
 # Airline Reservation System REST API
-![logo](db%20api.jpg)
+![logo](images/swagger1.png) | ![logo](images/grafana.png)
 
 ## Features
 * Triggers
 * Functions
 * Views
 * Stored procedures
+* Indexing 
 * Using transactions where necessary
 
 
@@ -13,20 +14,19 @@
 * Using promises
 * Documentation with `Swagger`(Open API 2.0)
 * Centralized error handling
-* Proper use of modules
 * Passwords hashed using `bcrypt`
 * Authentication with jwt
-* Validation using `joi`
+* User input validation using `joi`
+* Uses `promise-mysql` and connection pooling
 * Load balancing using `pm2` process management
 * Using `Docker`
 * MIT license
-* Git workflow
 * `Grafana` for Realtime Report generation 
 
 ## Prerequisites
--pm2 ```$ npm i pm2 -g```
+- pm2 ```$ npm i pm2 -g```
 
--nodemon ```$ npm i nodemon -g```
+- nodemon ```$ npm i nodemon -g```
 
 ## Install
 ```
@@ -35,14 +35,21 @@ $ npm install
 
 ## Quick Start
 
--Run the project- ```$ npm start```
+- Import the sql file at **dbBackup** folder to your mysql server
+
+- Add your database credentials to **db.conf.json**
+
+- Run the project in dev mode with `nodemon`- ```npm run dev```
+
+- Run the project- ```$ npm start```
+
 
 ## Authors
 
--[Rumesh Madhusanka](https://github.com/rumeshmadhusanka)
+- [Rumesh Madhusanka](https://github.com/rumeshmadhusanka)
 
--[Kushan Chamindu](https://github.com/KushanChamindu)
+- [Kushan Chamindu](https://github.com/KushanChamindu)
 
--[Shashimal Senarath](https://github.com/shashimalcse)
+- [Shashimal Senarath](https://github.com/shashimalcse)
 
--[Jayampathi Adhikari](https://github.com/jayampathiadhikari)
+- [Jayampathi Adhikari](https://github.com/jayampathiadhikari)

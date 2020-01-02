@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 30, 2019 at 08:20 PM
+-- Generation Time: Jan 02, 2020 at 11:02 AM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.1
 
@@ -32,14 +32,41 @@ BEGIN
 
     set @last = (SELECT last_flight_schedule_id(flight_id_in));
 
-    SELECT first_name                     as 'First Name',
-           second_name                       'Last Name',
+    SELECT firstName                      as 'First Name',
+           secondName                        'Last Name',
            email                          as 'Email',
            CONVERT(passport_id, char(30)) as 'Passport ID'
     from user
              NATURAL JOIN book
     WHERE book.schedule_id = @last
       and TIMESTAMPDIFF(YEAR, BirthDay, CURDATE()) >= 18;
+END$$
+
+CREATE
+    DEFINER = `root`@`localhost` PROCEDURE `add_payment`(IN `scheduleid` INT(10), IN `seatid` INT(10),
+                                                         IN `userid` INT(10), IN `today` VARCHAR(100),
+                                                         IN `first_name1` VARCHAR(100), IN `last_name1` VARCHAR(100),
+                                                         IN `birthday1` DATE, IN `passport_id1` VARCHAR(100),
+                                                         IN `book_id1` INT)
+BEGIN
+    start transaction;
+    set @seat_price = (SELECT `price`
+                       FROM `seat_details_according_to_schedule`
+                       where seat_details_according_to_schedule.schedule_id = scheduleid
+                         and seat_details_according_to_schedule.seat_id = seatid);
+    set @discount = (SELECT percentage
+                     FROM `discount_percentage`
+                              LEFT join user on discount_percentage.type = user.user_type
+                     WHERE user.user_id = userid);
+    IF @discount IS NOT null THEN
+        set @seat_price = ((100 - @discount) * @seat_price) / 100;
+    end if;
+    INSERT INTO `book` (`date`, `schedule_id`, `seat_id`, `user_id`, `payment`, id)
+    VALUES (today, scheduleid, seatid, userid, @seat_price, book_id1);
+
+    insert into passenger(first_name, last_name, birthday, passport_id, book_id)
+    values (first_name1, last_name1, birthday1, passport_id1, book_id1);
+    commit;
 END$$
 
 CREATE
@@ -71,14 +98,26 @@ BEGIN
 
     set @last = (SELECT last_flight_schedule_id(flight_id_in));
 
-    SELECT first_name                     as 'First Name',
-           second_name                       'Last Name',
+    SELECT firstName                      as 'First Name',
+           secondName                        'Last Name',
            email                          as 'Email',
            CONVERT(passport_id, char(30)) as 'Passport ID'
     from user
              NATURAL JOIN book
     WHERE book.schedule_id = @last
       and TIMESTAMPDIFF(YEAR, BirthDay, CURDATE()) <= 18;
+END$$
+
+CREATE
+    DEFINER = `root`@`localhost` PROCEDURE `get_above_18`(IN `flight_id_in` INT) NO SQL
+BEGIN
+
+    set @last = (SELECT last_flight_schedule_id(flight_id_in));
+
+    SELECT first_name as 'First Name', last_name 'Last Name', CONVERT(passport_id, char(30)) as 'Passport ID'
+    from passenger
+    WHERE book_id in (SELECT id from book where schedule_id = @last)
+      and TIMESTAMPDIFF(YEAR, birthday, CURDATE()) >= 18;
 END$$
 
 CREATE
@@ -107,6 +146,18 @@ begin
 END$$
 
 CREATE
+    DEFINER = `root`@`localhost` PROCEDURE `get_below_18`(IN `flight_id_in` INT) NO SQL
+BEGIN
+
+    set @last = (SELECT last_flight_schedule_id(flight_id_in));
+
+    SELECT first_name as 'First Name', last_name 'Last Name', CONVERT(passport_id, char(30)) as 'Passport ID'
+    from passenger
+    WHERE book_id in (SELECT id from book where schedule_id = @last)
+      and TIMESTAMPDIFF(YEAR, birthday, CURDATE()) <= 18;
+END$$
+
+CREATE
     DEFINER = `root`@`localhost` PROCEDURE `get_free_seats`(IN `model_id` VARCHAR(200), IN `flight_id` VARCHAR(200))
     READS SQL DATA
 BEGIN
@@ -118,6 +169,16 @@ BEGIN
     where seat.seat_id not in (select book.seat_id from book)
       and seat.model_id = model_id
       and flight.flight_id = flight_id;
+END$$
+
+CREATE
+    DEFINER = `root`@`localhost` PROCEDURE `get_gate_id_for_given_flight_id`(IN `flight_id_in` INT) NO SQL
+BEGIN
+
+    set @route_id = (SELECT route_id from flight WHERE flight_id = flight_id_in LIMIT 1);
+    set @origin = (SELECT origin from route WHERE route_id = @route_id limit 1);
+    SELECT gate_id from gate where airport_id = @origin ORDER BY gate_id DESC;
+
 END$$
 
 CREATE
@@ -160,6 +221,18 @@ BEGIN
       and (date between from_date and to_date);
 
 end$$
+
+CREATE
+    DEFINER = `root`@`localhost` PROCEDURE `get_seat_id_for_given_schedule_id`(IN `schedule_id_in` INT) NO SQL
+BEGIN
+
+    set @flight_id = (SELECT flight_id from schedule WHERE schedule_id = schedule_id_in LIMIT 1);
+    set @airplane_id = (SELECT airplane_id from flight WHERE flight_id = @flight_id limit 1);
+    set @model_id = (SELECT model_id from airplane WHERE airplane_id = @airplane_id);
+
+    SELECT seat_id from seat where model_id = @model_id;
+
+END$$
 
 CREATE
     DEFINER = `root`@`localhost` PROCEDURE `update_user`(IN `first_name` VARCHAR(200), IN `second_name` VARCHAR(200),
@@ -280,12 +353,15 @@ END$$
 CREATE
     DEFINER = `root`@`localhost` FUNCTION `get_revenue`(`model_name_in` VARCHAR(30)) RETURNS DOUBLE NO SQL
 BEGIN
-    set @model_id = (SELECT model_id from airplane_model where model_name = model_name_in limit 1);
+    DECLARE output double;
+    set @model_id = (SELECT model_id from airplane_model where model_name = model_name_in);
     set @airplane_id = (SELECT airplane_id FROM airplane where model_id = @model_id);
     set @flight_id = (SELECT flight_id from flight where airplane_id = @airplane_id);
-    set @schedule_id = (SELECT schedule_id from schedule where flight_id = @flight_id);
-    set @revenue = (SELECT sum(payment) from book where schedule_id = @schedule_id);
-    RETURN @revenue;
+    SELECT sum(payment)
+    INTO output
+    from book
+    where schedule_id in (SELECT schedule_id from schedule where flight_id = @flight_id);
+    RETURN output;
 END$$
 
 CREATE
@@ -366,11 +442,18 @@ DELIMITER ;
 
 CREATE TABLE `admin`
 (
-    `admin_id` int(11)     NOT NULL,
-    `username` varchar(20) NOT NULL,
-    `password` varchar(20) NOT NULL
+    `admin_id` int(11)       NOT NULL,
+    `email`    varchar(200)  NOT NULL,
+    `password` varchar(1000) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = latin1;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`admin_id`, `email`, `password`)
+VALUES (1, 'admin@gmail.com', '$2a$10$rp/KlmLUOZ2yNCt5SRTyJer9vg.I3i9y8FjX.Sg7Oi0LEAvGShQZ2');
 
 -- --------------------------------------------------------
 
@@ -390,17 +473,17 @@ CREATE TABLE `airplane`
 --
 
 INSERT INTO `airplane` (`airplane_id`, `model_id`)
-VALUES (10, '0002'),
-       (2, '0003'),
-       (7, '0006'),
-       (1, '0007'),
-       (3, '0008'),
-       (11, '0009'),
-       (6, '0013'),
-       (9, '0014'),
-       (4, '0015'),
-       (5, '0015'),
-       (8, '0019');
+VALUES (1, '0001'),
+       (2, '0002'),
+       (3, '0003'),
+       (4, '0004'),
+       (5, '0005'),
+       (6, '0006'),
+       (7, '0007'),
+       (8, '0008'),
+       (9, '0009'),
+       (10, '0010'),
+       (11, '0011');
 
 -- --------------------------------------------------------
 
@@ -435,12 +518,11 @@ VALUES ('0001', 'AirBus A220'),
        ('0013', 'Boeing 777'),
        ('0014', 'Boeing 787 Dreamliner'),
        ('0015', 'Comac C919'),
-       ('0016', 'Embraer ERJ 135'),
        ('0017', 'Embraer E-170'),
+       ('0016', 'Embraer ERJ 135'),
        ('0018', 'Ilyushin Il-96'),
        ('0019', 'Irkut MC-21'),
-       ('0020', 'Mitsubishi Regional Jet'),
-       ('1016', 'B737');
+       ('0020', 'Mitsubishi Regional Jet');
 
 --
 -- Triggers `airplane_model`
@@ -526,12 +608,12 @@ DELIMITER ;
 
 CREATE TABLE `book`
 (
-    `id`          int(10) NOT NULL,
-    `date`        date    NOT NULL,
-    `schedule_id` int(10) NOT NULL,
-    `seat_id`     int(10) NOT NULL,
-    `user_id`     int(10) NOT NULL,
-    `payment`     double DEFAULT NULL
+    `id`          int(10)   NOT NULL,
+    `date`        timestamp NOT NULL DEFAULT current_timestamp(),
+    `schedule_id` int(10)   NOT NULL,
+    `seat_id`     int(10)   NOT NULL,
+    `user_id`     int(10)   NOT NULL,
+    `payment`     double             DEFAULT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = latin1;
 
@@ -540,19 +622,65 @@ CREATE TABLE `book`
 --
 
 INSERT INTO `book` (`id`, `date`, `schedule_id`, `seat_id`, `user_id`, `payment`)
-VALUES (1, '2019-12-12', 1, 2, 2, NULL),
-       (3, '2019-12-10', 1, 3, 11, NULL),
-       (5, '2019-12-09', 1, 4, 13, NULL),
-       (6, '2019-12-10', 2, 10, 8, NULL),
-       (7, '2019-12-03', 2, 11, 6, NULL),
-       (9, '2019-12-03', 2, 12, 15, NULL),
-       (10, '2019-12-11', 2, 13, 14, NULL),
-       (11, '2019-12-19', 3, 9, 12, NULL),
-       (12, '2019-12-12', 1, 5, 1, NULL);
+VALUES (13, '2019-10-31 19:17:22', 1, 75, 1, 170000),
+       (14, '2019-11-02 18:30:00', 1, 104, 203018270, 160900),
+       (15, '2019-12-01 18:30:00', 1, 105, 3, 123000),
+       (16, '2019-11-02 18:30:00', 1, 83, 3, 132000),
+       (17, '2019-11-19 01:30:00', 1, 76, 4, 180000),
+       (18, '2019-11-11 18:30:00', 1, 107, 5, 230000),
+       (19, '2019-10-05 18:30:00', 1, 90, 5, 124000),
+       (20, '2019-11-03 18:30:00', 1, 94, 203018270, 130000),
+       (21, '2019-11-02 18:30:00', 2, 105, 8, 190800),
+       (22, '2019-11-03 18:30:00', 2, 104, 10, 78000),
+       (23, '2019-11-13 18:30:00', 2, 106, 13, 123000),
+       (24, '2019-11-29 18:30:00', 2, 107, 6, 130000),
+       (25, '2019-11-30 18:30:00', 2, 99, 2, 167000),
+       (26, '2019-11-29 18:30:00', 2, 100, 203018270, 156000),
+       (27, '2019-12-31 18:30:00', 1, 109, 203018270, 118300),
+       (17939109, '2020-01-01 18:30:00', 1, 79, 203018270, 112294),
+       (48724759, '2019-12-31 18:30:00', 1, 81, 1, 180500),
+       (98505715, '2020-01-01 18:30:00', 1, 106, 203018270, 117230);
 
 --
 -- Triggers `book`
 --
+DELIMITER $$
+CREATE TRIGGER `check_date_for_booking`
+    BEFORE INSERT
+    ON `book`
+    FOR EACH ROW
+BEGIN
+    set @id1 = NEW.schedule_id;
+    set @id0 = NEW.date;
+    set @date = (select date from schedule where schedule_id = @id1);
+
+    set @yes = (SELECT IF(@id0 > @date, TRUE, FALSE));
+    IF @yes THEN
+        SIGNAL SQLSTATE '45000';
+
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `check_seats`
+    BEFORE INSERT
+    ON `book`
+    FOR EACH ROW
+BEGIN
+    set @id1 = NEW.schedule_id;
+    set @id0 = NEW.seat_id;
+    set @flight_id = (SELECT flight_id from schedule WHERE schedule_id = @id1 LIMIT 1);
+    set @airplane_id = (SELECT airplane_id from flight WHERE flight_id = @flight_id limit 1);
+    set @model_id = (SELECT model_id from airplane WHERE airplane_id = @airplane_id);
+    set @yes = (SELECT IF(@id0 not in (SELECT seat_id from seat where model_id = @model_id), TRUE, FALSE));
+    IF @yes THEN
+        SIGNAL SQLSTATE '45000';
+
+    END IF;
+END
+$$
+DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `isbooked`
     BEFORE INSERT
@@ -600,7 +728,7 @@ CREATE TABLE `book_details`
     `id`             int(10),
     `schedule_id`    int(10),
     `user_id`        int(10),
-    `date`           date,
+    `date`           timestamp,
     `scheduled_date` date,
     `origin`         varchar(50),
     `destination`    varchar(50),
@@ -744,9 +872,41 @@ CREATE TABLE `gate`
 
 INSERT INTO `gate` (`gate_id`, `airport_id`, `name`)
 VALUES (2, 1, 'A22'),
-       (3, 2, 'E45'),
-       (1, 2, 'kushan gate'),
-       (4, 5, 'X23');
+       (6, 1, 'C56'),
+       (1, 1, 'D34'),
+       (3, 1, 'S32'),
+       (4, 1, 'X23'),
+       (5, 1, 'X45'),
+       (11, 2, 'A22'),
+       (14, 2, 'C56'),
+       (10, 2, 'D34'),
+       (12, 2, 'S32'),
+       (15, 2, 'X23'),
+       (13, 2, 'X45'),
+       (17, 3, 'A22'),
+       (20, 3, 'C56'),
+       (16, 3, 'D34'),
+       (18, 3, 'S32'),
+       (21, 3, 'X23'),
+       (19, 3, 'X45'),
+       (23, 4, 'A22'),
+       (26, 4, 'C56'),
+       (22, 4, 'D34'),
+       (24, 4, 'S32'),
+       (27, 4, 'X23'),
+       (25, 4, 'X45'),
+       (29, 5, 'A22'),
+       (32, 5, 'C56'),
+       (28, 5, 'D34'),
+       (30, 5, 'S32'),
+       (33, 5, 'X23'),
+       (31, 5, 'X45'),
+       (35, 6, 'A22'),
+       (38, 6, 'C56'),
+       (34, 6, 'D34'),
+       (36, 6, 'S32'),
+       (39, 6, 'X23'),
+       (37, 6, 'X45');
 
 --
 -- Triggers `gate`
@@ -874,6 +1034,32 @@ VALUES (1, 'Sr Lanka'),
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `passenger`
+--
+
+CREATE TABLE `passenger`
+(
+    `id`          int(11)     NOT NULL,
+    `first_name`  varchar(30) NOT NULL,
+    `last_name`   varchar(30) NOT NULL,
+    `birthday`    date        NOT NULL,
+    `passport_id` varchar(50) NOT NULL,
+    `book_id`     int(10)     NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
+--
+-- Dumping data for table `passenger`
+--
+
+INSERT INTO `passenger` (`id`, `first_name`, `last_name`, `birthday`, `passport_id`, `book_id`)
+VALUES (1, 'shashimal', 'senarath', '1997-01-05', '454626233B', 22),
+       (2, 'string', 'string', '2005-08-07', 'string', 48724759),
+       (4, 'Jasda', 'asdasd', '1997-09-03', 'sgassjdghg', 17939109);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pilot`
 --
 
@@ -904,27 +1090,29 @@ CREATE TABLE `registered_user`
 --
 
 INSERT INTO `registered_user` (`user_id`, `username`, `password`)
-VALUES (9, 'anuradha', '12345'),
-       (10, 'misse', '12345'),
-       (11, 'hiruna', '12345'),
-       (12, 'kashyapa', '12345'),
-       (13, 'hemaka', '12345'),
-       (14, 'hashan', '12345'),
-       (15, 'sanju', '12345'),
-       (16, 'pasindu', '12345'),
-       (17, 'basuru', '12345'),
-       (59916, 'string', '$2a$10$N4o5TJv6c/VsDzDb6j6UvuxfxjGYQeJA/gibuPyLqt7B0o2p9tLlW'),
-       (97559, 'string', '$2a$10$l4X7FNdsuCErbw9k6gVqD.xtVngF58XwZMivhKuMQgX9QW6zR4Ec2'),
+VALUES (3, 'jaya', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (9, 'anuradha', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (10, 'misse', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (11, 'hiruna', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (12, 'kashyapa', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (13, 'hemaka', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (14, 'hashan', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (15, 'sanju', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (16, 'pasindu', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (17, 'basuru', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
        (15123, 'string', '$2a$10$TV9Wu5xkc9/krb.ptbYNlevXn0zHzECboVpJLbQv9VJR0h9XqTaeC'),
        (45269, 'string', '$2a$10$YaNL9a1AlWbiVns2n7/fRu.SbhUcJkKnkn/qr/SMtFVSNUuEHqhMq'),
-       (234353, 'hyth', 'hyth'),
+       (59916, 'string', '$2a$10$N4o5TJv6c/VsDzDb6j6UvuxfxjGYQeJA/gibuPyLqt7B0o2p9tLlW'),
+       (97559, 'string', '$2a$10$l4X7FNdsuCErbw9k6gVqD.xtVngF58XwZMivhKuMQgX9QW6zR4Ec2'),
+       (234353, 'hyth', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
+       (203018270, 'string', '$2a$10$jiv6wAqrSFRUUvXxQxtkuuOPED4YKXULiPMQO4oOAbKHmLf2aOqre'),
        (272995019, 'string', '$2a$10$VO.gwJIKRMnwDTKbD0n43.GDJkz5OBIRATaUGvdcpUGUibdGuVsbu'),
        (435029035, 'string', '$2a$10$tKLANhlLPx4YVaq9Jv2Pl.XaLP7vHfWkTn00m53Qxu03yP7M02sDm'),
-       (876401798, 'string', '$2a$10$k5ph6Ia8zJcAIFgM5oZmwe.q.BD8zt7hnYqFxJ8.QApPdYs.0NhXu'),
-       (602507817, 'string', '$2a$10$cJ.xepy2ZCEdrrB691ZTP.qVcnPi/aixJgOG0cRwRpe18.mTwzs6K'),
-       (559653779, 'bdhfbeiubfiuvbvv', '$2a$10$wNim6ZpT/GTh8w10kPfJX.0eEcM.ADzPKQPmHjnnVaB3xB1opCL76'),
        (483291754, 'bdhfbeiubfiuvbvv', '$2a$10$giFNizvkm3V1lavGV7rB3uplGuGiFZ4.vMgFj52EvY9Z.Q8B6Pp5G'),
-       (613604230, 'bdhfbeiubfiuvbvv', '$2a$10$8zWIrP0aSxpZ/LCGQXVsy.isiXstMd7JZTjql0B/2mTUc8cbgxY7G');
+       (559653779, 'bdhfbeiubfiuvbvv', '$2a$10$wNim6ZpT/GTh8w10kPfJX.0eEcM.ADzPKQPmHjnnVaB3xB1opCL76'),
+       (602507817, 'string', '$2a$10$cJ.xepy2ZCEdrrB691ZTP.qVcnPi/aixJgOG0cRwRpe18.mTwzs6K'),
+       (613604230, 'bdhfbeiubfiuvbvv', '$2a$10$8zWIrP0aSxpZ/LCGQXVsy.isiXstMd7JZTjql0B/2mTUc8cbgxY7G'),
+       (876401798, 'string', '$2a$10$k5ph6Ia8zJcAIFgM5oZmwe.q.BD8zt7hnYqFxJ8.QApPdYs.0NhXu');
 
 -- --------------------------------------------------------
 
@@ -966,8 +1154,7 @@ BEGIN
     SELECT `route_id`
     INTO id1
     FROM `route`
-    WHERE route.origin = NEW.origin
-      and route.destination = NEW.destination
+    WHERE route.origin = NEW.origin and route.destination = NEW.destination
     LIMIT 1;
     IF id1 is not NULL THEN
         SIGNAL SQLSTATE '45000';
@@ -999,9 +1186,60 @@ CREATE TABLE `schedule`
 --
 
 INSERT INTO `schedule` (`schedule_id`, `date`, `flight_id`, `dep_time`, `arival_time`, `gate_id`, `delay`)
-VALUES (1, '2019-12-20', 1, '09:13:00', '17:25:00', 1, NULL),
-       (2, '2019-12-26', 1, '10:22:08', '15:06:00', 1, NULL),
-       (3, '2019-12-13', 2, '05:00:00', '12:00:00', 3, NULL);
+VALUES (1, '2020-01-16', 1, '09:13:00', '17:25:00', 1, NULL),
+       (2, '2020-01-20', 1, '10:22:08', '15:06:00', 1, NULL),
+       (3, '2020-01-15', 2, '05:00:00', '12:00:00', 3, NULL),
+       (4, '2020-01-02', 1, '09:00:00', '07:00:00', 4, NULL),
+       (5, '2020-01-20', 5, '23:00:00', '04:00:00', 37, NULL),
+       (6, '2020-01-13', 3, '07:00:00', '06:00:00', 24, NULL),
+       (7, '2020-01-20', 3, '07:21:00', '12:05:00', 25, NULL),
+       (8, '2020-04-01', 4, '07:00:00', '10:00:00', 17, '00:00:00'),
+       (9, '2020-08-14', 3, '03:00:00', '07:00:00', 26, NULL),
+       (10, '2020-02-03', 6, '03:00:00', '08:00:00', 23, NULL);
+
+--
+-- Triggers `schedule`
+--
+DELIMITER $$
+CREATE TRIGGER `check_flight_time_range_validity`
+    AFTER INSERT
+    ON `schedule`
+    FOR EACH ROW
+BEGIN
+
+    #     set @airplane_id = (select airplane_id from schedule inner join flight f on schedule.flight_id = f.flight_id where schedule.flight_id =NEW.flight_id);
+    SET @new_datetime_arrival = UNIX_TIMESTAMP(convert(concat(date, ' ', NEW.arival_time), datetime));
+    SET @new_datetime_departure = UNIX_TIMESTAMP(convert(concat(date, ' ', NEW.dep_time), datetime));
+    SET @old_datetime_departure = (select UNIX_TIMESTAMP(convert(concat(date, ' ', dep_time), datetime))
+                                   from schedule
+                                   where flight_id = NEW.flight_id);
+    SET @old_datetime_arrival = (select UNIX_TIMESTAMP(convert(concat(date, ' ', arival_time), datetime))
+                                 from schedule
+                                 where flight_id = NEW.flight_id);
+    IF not (@new_datetime_departure > @old_datetime_arrival OR @new_datetime_arrival < @old_datetime_departure) THEN
+        SIGNAL SQLSTATE '45001';
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `check_gates`
+    BEFORE INSERT
+    ON `schedule`
+    FOR EACH ROW
+BEGIN
+    SET @id = NEW.flight_id;
+    SET @id0 = NEW.gate_id;
+    set @route_id = (SELECT route_id from flight WHERE flight_id = @id LIMIT 1);
+    set @origin = (SELECT origin from route WHERE route_id = @route_id limit 1);
+    set @yes = (SELECT IF(@id0 not in (SELECT gate_id from gate where airport_id = @origin), TRUE, FALSE));
+    IF @yes THEN
+        SIGNAL SQLSTATE '45000';
+
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -1041,19 +1279,460 @@ CREATE TABLE `seat`
 --
 
 INSERT INTO `seat` (`seat_id`, `model_id`, `seat_name`, `class`)
-VALUES (1, '0007', '21 C', 'E'),
-       (2, '0007', '21 A', 'E'),
-       (3, '0007', '22 C', 'E'),
-       (4, '0007', 'B12', 'E'),
-       (5, '0007', 'B23', 'E'),
-       (6, '0015', 'A02', 'B'),
-       (7, '0015', 'A03', 'B'),
-       (8, '0015', 'A23', 'E'),
-       (9, '0015', 'A22', 'E'),
-       (10, '0003', 'A18', 'B'),
-       (11, '0003', 'C23', 'E'),
-       (12, '0003', 'C22', 'E'),
-       (13, '0003', 'A14', 'B');
+VALUES (1, '0007', 'A1', 'E'),
+       (2, '0007', 'A2', 'E'),
+       (3, '0007', 'A3', 'E'),
+       (4, '0007', 'A4', 'E'),
+       (5, '0007', 'A5', 'E'),
+       (6, '0007', 'A6', 'E'),
+       (7, '0007', 'A7', 'E'),
+       (8, '0007', 'A8', 'E'),
+       (9, '0007', 'A9', 'E'),
+       (10, '0007', 'B1', 'E'),
+       (11, '0007', 'B2', 'E'),
+       (12, '0007', 'B3', 'E'),
+       (13, '0007', 'B4', 'E'),
+       (14, '0007', 'B5', 'E'),
+       (15, '0007', 'B6', 'E'),
+       (16, '0007', 'B7', 'E'),
+       (17, '0007', 'B8', 'E'),
+       (18, '0007', 'B9', 'E'),
+       (19, '0007', 'B10', 'E'),
+       (20, '0007', 'C1', 'E'),
+       (21, '0007', 'C2', 'E'),
+       (22, '0007', 'C3', 'E'),
+       (23, '0007', 'C4', 'E'),
+       (24, '0007', 'C5', 'E'),
+       (25, '0007', 'C6', 'E'),
+       (26, '0007', 'C7', 'E'),
+       (27, '0007', 'C8', 'E'),
+       (28, '0007', 'C9', 'E'),
+       (29, '0007', 'C10', 'E'),
+       (30, '0007', 'A11', 'B'),
+       (31, '0007', 'A12', 'B'),
+       (32, '0007', 'B11', 'B'),
+       (33, '0007', 'B12', 'B'),
+       (34, '0007', 'C11', 'B'),
+       (35, '0007', 'C12', 'B'),
+       (41, '0008', 'A2', 'E'),
+       (42, '0008', 'A3', 'E'),
+       (43, '0008', 'A4', 'E'),
+       (44, '0008', 'A5', 'E'),
+       (45, '0008', 'A6', 'E'),
+       (46, '0008', 'A7', 'E'),
+       (47, '0008', 'A8', 'E'),
+       (48, '0008', 'A9', 'E'),
+       (49, '0008', 'B1', 'E'),
+       (50, '0008', 'B2', 'E'),
+       (51, '0008', 'B3', 'E'),
+       (52, '0008', 'B4', 'E'),
+       (53, '0008', 'B5', 'E'),
+       (54, '0008', 'B6', 'E'),
+       (55, '0008', 'B7', 'E'),
+       (56, '0008', 'B8', 'E'),
+       (57, '0008', 'B9', 'E'),
+       (58, '0008', 'B10', 'E'),
+       (59, '0008', 'C1', 'E'),
+       (60, '0008', 'C2', 'E'),
+       (61, '0008', 'C3', 'E'),
+       (62, '0008', 'C4', 'E'),
+       (63, '0008', 'C5', 'E'),
+       (64, '0008', 'C6', 'E'),
+       (65, '0008', 'C7', 'E'),
+       (66, '0008', 'C8', 'E'),
+       (67, '0008', 'C9', 'E'),
+       (68, '0008', 'C10', 'E'),
+       (69, '0008', 'A11', 'B'),
+       (70, '0008', 'A12', 'B'),
+       (71, '0008', 'B11', 'B'),
+       (72, '0008', 'B12', 'B'),
+       (73, '0008', 'C11', 'B'),
+       (74, '0008', 'C12', 'B'),
+       (75, '0001', 'A1', 'E'),
+       (76, '0001', 'A2', 'E'),
+       (77, '0001', 'A3', 'E'),
+       (78, '0001', 'A4', 'E'),
+       (79, '0001', 'A5', 'E'),
+       (80, '0001', 'A6', 'E'),
+       (81, '0001', 'A7', 'E'),
+       (82, '0001', 'A8', 'E'),
+       (83, '0001', 'A9', 'E'),
+       (84, '0001', 'B1', 'E'),
+       (85, '0001', 'B2', 'E'),
+       (86, '0001', 'B3', 'E'),
+       (87, '0001', 'B4', 'E'),
+       (88, '0001', 'B5', 'E'),
+       (89, '0001', 'B6', 'E'),
+       (90, '0001', 'B7', 'E'),
+       (91, '0001', 'B8', 'E'),
+       (92, '0001', 'B9', 'E'),
+       (93, '0001', 'B10', 'E'),
+       (94, '0001', 'C1', 'E'),
+       (95, '0001', 'C2', 'E'),
+       (96, '0001', 'C3', 'E'),
+       (97, '0001', 'C4', 'E'),
+       (98, '0001', 'C5', 'E'),
+       (99, '0001', 'C6', 'E'),
+       (100, '0001', 'C7', 'E'),
+       (101, '0001', 'C8', 'E'),
+       (102, '0001', 'C9', 'E'),
+       (103, '0001', 'C10', 'E'),
+       (104, '0001', 'A11', 'B'),
+       (105, '0001', 'A12', 'B'),
+       (106, '0001', 'B11', 'B'),
+       (107, '0001', 'B12', 'B'),
+       (108, '0001', 'C11', 'B'),
+       (109, '0001', 'C12', 'B'),
+       (110, '0002', 'A1', 'E'),
+       (111, '0002', 'A2', 'E'),
+       (112, '0002', 'A3', 'E'),
+       (113, '0002', 'A4', 'E'),
+       (114, '0002', 'A5', 'E'),
+       (115, '0002', 'A6', 'E'),
+       (116, '0002', 'A7', 'E'),
+       (117, '0002', 'A8', 'E'),
+       (118, '0002', 'A9', 'E'),
+       (119, '0002', 'B1', 'E'),
+       (120, '0002', 'B2', 'E'),
+       (121, '0002', 'B3', 'E'),
+       (122, '0002', 'B4', 'E'),
+       (123, '0002', 'B5', 'E'),
+       (124, '0002', 'B6', 'E'),
+       (125, '0002', 'B7', 'E'),
+       (126, '0002', 'B8', 'E'),
+       (127, '0002', 'B9', 'E'),
+       (128, '0002', 'B10', 'E'),
+       (129, '0002', 'C1', 'E'),
+       (130, '0002', 'C2', 'E'),
+       (131, '0002', 'C3', 'E'),
+       (132, '0002', 'C4', 'E'),
+       (133, '0002', 'C5', 'E'),
+       (134, '0002', 'C6', 'E'),
+       (135, '0002', 'C7', 'E'),
+       (136, '0002', 'C8', 'E'),
+       (137, '0002', 'C9', 'E'),
+       (138, '0002', 'C10', 'E'),
+       (139, '0002', 'A11', 'B'),
+       (140, '0002', 'A12', 'B'),
+       (141, '0002', 'B11', 'B'),
+       (142, '0002', 'B12', 'B'),
+       (143, '0002', 'C11', 'B'),
+       (145, '0002', 'C12', 'B'),
+       (146, '0003', 'A1', 'E'),
+       (147, '0003', 'A2', 'E'),
+       (148, '0003', 'A3', 'E'),
+       (149, '0003', 'A4', 'E'),
+       (150, '0003', 'A5', 'E'),
+       (151, '0003', 'A6', 'E'),
+       (152, '0003', 'A7', 'E'),
+       (153, '0003', 'A8', 'E'),
+       (154, '0003', 'A9', 'E'),
+       (155, '0003', 'B1', 'E'),
+       (156, '0003', 'B2', 'E'),
+       (157, '0003', 'B3', 'E'),
+       (158, '0003', 'B4', 'E'),
+       (159, '0003', 'B5', 'E'),
+       (160, '0003', 'B6', 'E'),
+       (161, '0003', 'B7', 'E'),
+       (162, '0003', 'B8', 'E'),
+       (163, '0003', 'B9', 'E'),
+       (164, '0003', 'B10', 'E'),
+       (165, '0003', 'C1', 'E'),
+       (166, '0003', 'C2', 'E'),
+       (167, '0003', 'C3', 'E'),
+       (168, '0003', 'C4', 'E'),
+       (169, '0003', 'C5', 'E'),
+       (170, '0003', 'C6', 'E'),
+       (171, '0003', 'C7', 'E'),
+       (172, '0003', 'C8', 'E'),
+       (173, '0003', 'C9', 'E'),
+       (174, '0003', 'C10', 'E'),
+       (175, '0003', 'A11', 'B'),
+       (176, '0003', 'A12', 'B'),
+       (177, '0003', 'B11', 'B'),
+       (178, '0003', 'B12', 'B'),
+       (179, '0003', 'C11', 'B'),
+       (180, '0003', 'C12', 'B'),
+       (181, '0004', 'A1', 'E'),
+       (182, '0004', 'A2', 'E'),
+       (183, '0004', 'A3', 'E'),
+       (184, '0004', 'A4', 'E'),
+       (185, '0004', 'A5', 'E'),
+       (186, '0004', 'A6', 'E'),
+       (187, '0004', 'A7', 'E'),
+       (188, '0004', 'A8', 'E'),
+       (189, '0004', 'A9', 'E'),
+       (190, '0004', 'B1', 'E'),
+       (191, '0004', 'B2', 'E'),
+       (192, '0004', 'B3', 'E'),
+       (193, '0004', 'B4', 'E'),
+       (194, '0004', 'B5', 'E'),
+       (195, '0004', 'B6', 'E'),
+       (196, '0004', 'B7', 'E'),
+       (197, '0004', 'B8', 'E'),
+       (198, '0004', 'B9', 'E'),
+       (199, '0004', 'B10', 'E'),
+       (200, '0004', 'C1', 'E'),
+       (201, '0004', 'C2', 'E'),
+       (202, '0004', 'C3', 'E'),
+       (203, '0004', 'C4', 'E'),
+       (204, '0004', 'C5', 'E'),
+       (205, '0004', 'C6', 'E'),
+       (206, '0004', 'C7', 'E'),
+       (207, '0004', 'C8', 'E'),
+       (208, '0004', 'C9', 'E'),
+       (209, '0004', 'C10', 'E'),
+       (210, '0004', 'A11', 'B'),
+       (211, '0004', 'A12', 'B'),
+       (212, '0004', 'B11', 'B'),
+       (213, '0004', 'B12', 'B'),
+       (214, '0004', 'C11', 'B'),
+       (215, '0004', 'C12', 'B'),
+       (216, '0005', 'A1', 'E'),
+       (217, '0005', 'A2', 'E'),
+       (218, '0005', 'A3', 'E'),
+       (219, '0005', 'A4', 'E'),
+       (220, '0005', 'A5', 'E'),
+       (221, '0005', 'A6', 'E'),
+       (222, '0005', 'A7', 'E'),
+       (223, '0005', 'A8', 'E'),
+       (224, '0005', 'A9', 'E'),
+       (225, '0005', 'B1', 'E'),
+       (226, '0005', 'B2', 'E'),
+       (227, '0005', 'B3', 'E'),
+       (228, '0005', 'B4', 'E'),
+       (229, '0005', 'B5', 'E'),
+       (230, '0005', 'B6', 'E'),
+       (231, '0005', 'B7', 'E'),
+       (232, '0005', 'B8', 'E'),
+       (233, '0005', 'B9', 'E'),
+       (234, '0005', 'B10', 'E'),
+       (235, '0005', 'C1', 'E'),
+       (236, '0005', 'C2', 'E'),
+       (237, '0005', 'C3', 'E'),
+       (238, '0005', 'C4', 'E'),
+       (239, '0005', 'C5', 'E'),
+       (240, '0005', 'C6', 'E'),
+       (241, '0005', 'C7', 'E'),
+       (242, '0005', 'C8', 'E'),
+       (243, '0005', 'C9', 'E'),
+       (244, '0005', 'C10', 'E'),
+       (245, '0005', 'A11', 'B'),
+       (246, '0005', 'A12', 'B'),
+       (247, '0005', 'B11', 'B'),
+       (248, '0005', 'B12', 'B'),
+       (249, '0005', 'C11', 'B'),
+       (250, '0005', 'C12', 'B'),
+       (251, '0006', 'A1', 'E'),
+       (252, '0006', 'A2', 'E'),
+       (253, '0006', 'A3', 'E'),
+       (254, '0006', 'A4', 'E'),
+       (255, '0006', 'A5', 'E'),
+       (256, '0006', 'A6', 'E'),
+       (257, '0006', 'A7', 'E'),
+       (258, '0006', 'A8', 'E'),
+       (259, '0006', 'A9', 'E'),
+       (260, '0006', 'B1', 'E'),
+       (261, '0006', 'B2', 'E'),
+       (262, '0006', 'B3', 'E'),
+       (263, '0006', 'B4', 'E'),
+       (264, '0006', 'B5', 'E'),
+       (265, '0006', 'B6', 'E'),
+       (266, '0006', 'B7', 'E'),
+       (267, '0006', 'B8', 'E'),
+       (268, '0006', 'B9', 'E'),
+       (269, '0006', 'B10', 'E'),
+       (270, '0006', 'C1', 'E'),
+       (271, '0006', 'C2', 'E'),
+       (272, '0006', 'C3', 'E'),
+       (273, '0006', 'C4', 'E'),
+       (274, '0006', 'C5', 'E'),
+       (275, '0006', 'C6', 'E'),
+       (276, '0006', 'C7', 'E'),
+       (277, '0006', 'C8', 'E'),
+       (278, '0006', 'C9', 'E'),
+       (279, '0006', 'C10', 'E'),
+       (280, '0006', 'A11', 'B'),
+       (281, '0006', 'A12', 'B'),
+       (282, '0006', 'B11', 'B'),
+       (283, '0006', 'B12', 'B'),
+       (284, '0006', 'C11', 'B'),
+       (285, '0006', 'C12', 'B'),
+       (286, '0009', 'A1', 'E'),
+       (288, '0009', 'A2', 'E'),
+       (289, '0009', 'A3', 'E'),
+       (290, '0009', 'A4', 'E'),
+       (291, '0009', 'A5', 'E'),
+       (292, '0009', 'A6', 'E'),
+       (293, '0009', 'A7', 'E'),
+       (294, '0009', 'A8', 'E'),
+       (295, '0009', 'A9', 'E'),
+       (296, '0009', 'B1', 'E'),
+       (297, '0009', 'B2', 'E'),
+       (298, '0009', 'B3', 'E'),
+       (299, '0009', 'B4', 'E'),
+       (300, '0009', 'B5', 'E'),
+       (301, '0009', 'B6', 'E'),
+       (302, '0009', 'B7', 'E'),
+       (303, '0009', 'B8', 'E'),
+       (304, '0009', 'B9', 'E'),
+       (305, '0009', 'B10', 'E'),
+       (306, '0009', 'C1', 'E'),
+       (307, '0009', 'C2', 'E'),
+       (308, '0009', 'C3', 'E'),
+       (309, '0009', 'C4', 'E'),
+       (310, '0009', 'C5', 'E'),
+       (311, '0009', 'C6', 'E'),
+       (312, '0009', 'C7', 'E'),
+       (313, '0009', 'C8', 'E'),
+       (314, '0009', 'C9', 'E'),
+       (315, '0009', 'C10', 'E'),
+       (316, '0009', 'A11', 'B'),
+       (317, '0009', 'A12', 'B'),
+       (318, '0009', 'B11', 'B'),
+       (319, '0009', 'B12', 'B'),
+       (320, '0009', 'C11', 'B'),
+       (321, '0009', 'C12', 'B'),
+       (322, '0010', 'A1', 'E'),
+       (323, '0010', 'A2', 'E'),
+       (324, '0010', 'A3', 'E'),
+       (325, '0010', 'A4', 'E'),
+       (326, '0010', 'A5', 'E'),
+       (327, '0010', 'A6', 'E'),
+       (328, '0010', 'A7', 'E'),
+       (329, '0010', 'A8', 'E'),
+       (330, '0010', 'A9', 'E'),
+       (331, '0010', 'B1', 'E'),
+       (332, '0010', 'B2', 'E'),
+       (333, '0010', 'B3', 'E'),
+       (334, '0010', 'B4', 'E'),
+       (335, '0010', 'B5', 'E'),
+       (336, '0010', 'B6', 'E'),
+       (337, '0010', 'B7', 'E'),
+       (338, '0010', 'B8', 'E'),
+       (339, '0010', 'B9', 'E'),
+       (340, '0010', 'B10', 'E'),
+       (341, '0010', 'C1', 'E'),
+       (342, '0010', 'C2', 'E'),
+       (343, '0010', 'C3', 'E'),
+       (344, '0010', 'C4', 'E'),
+       (345, '0010', 'C5', 'E'),
+       (346, '0010', 'C6', 'E'),
+       (347, '0010', 'C7', 'E'),
+       (348, '0010', 'C8', 'E'),
+       (349, '0010', 'C9', 'E'),
+       (350, '0010', 'C10', 'E'),
+       (351, '0010', 'A11', 'B'),
+       (352, '0010', 'A12', 'B'),
+       (353, '0010', 'B11', 'B'),
+       (354, '0010', 'B12', 'B'),
+       (355, '0010', 'C11', 'B'),
+       (356, '0010', 'C12', 'B'),
+       (357, '0011', 'A1', 'E'),
+       (358, '0011', 'A2', 'E'),
+       (359, '0011', 'A3', 'E'),
+       (360, '0011', 'A4', 'E'),
+       (361, '0011', 'A5', 'E'),
+       (362, '0011', 'A6', 'E'),
+       (363, '0011', 'A7', 'E'),
+       (364, '0011', 'A8', 'E'),
+       (365, '0011', 'A9', 'E'),
+       (366, '0011', 'B1', 'E'),
+       (367, '0011', 'B2', 'E'),
+       (368, '0011', 'B3', 'E'),
+       (369, '0011', 'B4', 'E'),
+       (370, '0011', 'B5', 'E'),
+       (371, '0011', 'B6', 'E'),
+       (372, '0011', 'B7', 'E'),
+       (373, '0011', 'B8', 'E'),
+       (374, '0011', 'B9', 'E'),
+       (375, '0011', 'B10', 'E'),
+       (376, '0011', 'C1', 'E'),
+       (377, '0011', 'C2', 'E'),
+       (378, '0011', 'C3', 'E'),
+       (379, '0011', 'C4', 'E'),
+       (380, '0011', 'C5', 'E'),
+       (381, '0011', 'C6', 'E'),
+       (382, '0011', 'C7', 'E'),
+       (383, '0011', 'C8', 'E'),
+       (384, '0011', 'C9', 'E'),
+       (385, '0011', 'C10', 'E'),
+       (386, '0011', 'A11', 'B'),
+       (387, '0011', 'A12', 'B'),
+       (388, '0011', 'B11', 'B'),
+       (389, '0011', 'B12', 'B'),
+       (390, '0011', 'C11', 'B'),
+       (391, '0011', 'C12', 'B'),
+       (392, '0012', 'A1', 'E'),
+       (393, '0012', 'A2', 'E'),
+       (394, '0012', 'A3', 'E'),
+       (395, '0012', 'A4', 'E'),
+       (396, '0012', 'A5', 'E'),
+       (397, '0012', 'A6', 'E'),
+       (398, '0012', 'A7', 'E'),
+       (399, '0012', 'A8', 'E'),
+       (400, '0012', 'A9', 'E'),
+       (401, '0012', 'B1', 'E'),
+       (402, '0012', 'B2', 'E'),
+       (403, '0012', 'B3', 'E'),
+       (404, '0012', 'B4', 'E'),
+       (405, '0012', 'B5', 'E'),
+       (406, '0012', 'B6', 'E'),
+       (407, '0012', 'B7', 'E'),
+       (408, '0012', 'B8', 'E'),
+       (409, '0012', 'B9', 'E'),
+       (410, '0012', 'B10', 'E'),
+       (411, '0012', 'C1', 'E'),
+       (412, '0012', 'C2', 'E'),
+       (413, '0012', 'C3', 'E'),
+       (414, '0012', 'C4', 'E'),
+       (415, '0012', 'C5', 'E'),
+       (416, '0012', 'C6', 'E'),
+       (417, '0012', 'C7', 'E'),
+       (418, '0012', 'C8', 'E'),
+       (419, '0012', 'C9', 'E'),
+       (420, '0012', 'C10', 'E'),
+       (421, '0012', 'A11', 'B'),
+       (422, '0012', 'A12', 'B'),
+       (423, '0012', 'B11', 'B'),
+       (424, '0012', 'B12', 'B'),
+       (425, '0012', 'C11', 'B'),
+       (426, '0012', 'C12', 'B'),
+       (427, '0013', 'A1', 'E'),
+       (428, '0013', 'A2', 'E'),
+       (429, '0013', 'A3', 'E'),
+       (430, '0013', 'A4', 'E'),
+       (431, '0013', 'A5', 'E'),
+       (432, '0013', 'A6', 'E'),
+       (433, '0013', 'A7', 'E'),
+       (434, '0013', 'A8', 'E'),
+       (435, '0013', 'A9', 'E'),
+       (436, '0013', 'B1', 'E'),
+       (437, '0013', 'B2', 'E'),
+       (438, '0013', 'B3', 'E'),
+       (439, '0013', 'B4', 'E'),
+       (440, '0013', 'B5', 'E'),
+       (441, '0013', 'B6', 'E'),
+       (442, '0013', 'B7', 'E'),
+       (443, '0013', 'B8', 'E'),
+       (444, '0013', 'B9', 'E'),
+       (445, '0013', 'B10', 'E'),
+       (446, '0013', 'C1', 'E'),
+       (447, '0013', 'C2', 'E'),
+       (448, '0013', 'C3', 'E'),
+       (449, '0013', 'C4', 'E'),
+       (450, '0013', 'C5', 'E'),
+       (451, '0013', 'C6', 'E'),
+       (452, '0013', 'C7', 'E'),
+       (453, '0013', 'C8', 'E'),
+       (454, '0013', 'C9', 'E'),
+       (455, '0013', 'C10', 'E'),
+       (456, '0013', 'A11', 'B'),
+       (457, '0013', 'A12', 'B'),
+       (458, '0013', 'B11', 'B'),
+       (459, '0013', 'B12', 'B'),
+       (460, '0013', 'C11', 'B'),
+       (461, '0013', 'C12', 'B');
 
 -- --------------------------------------------------------
 
@@ -1064,11 +1743,12 @@ VALUES (1, '0007', '21 C', 'E'),
 CREATE TABLE `seat_details_according_to_schedule`
 (
     `schedule_id` int(10),
-    `seat_id`     int(10),
-    `seat_name`   varchar(10),
-    `seat_class`  varchar(10),
     `flight_id`   int(10),
-    `seat_price`  int(10)
+    `price`       int(10),
+    `seat_id`     int(10),
+    `class`       varchar(10),
+    `seat_name`   varchar(10),
+    `model_id`    varchar(10)
 );
 
 -- --------------------------------------------------------
@@ -1091,15 +1771,215 @@ CREATE TABLE `seat_price`
 --
 
 INSERT INTO `seat_price` (`price_id`, `price`, `flight_id`, `seat_id`)
-VALUES (1, 100000, 1, 1),
-       (2, 120000, 1, 2),
-       (3, 127000, 1, 3),
-       (4, 123000, 2, 2),
-       (5, 123400, 1, 12),
-       (8, 140000, 2, 13),
-       (9, 190000, 1, 4),
-       (12, 130000, 1, 8),
-       (13, 190800, 1, 13);
+VALUES (1, 100000, 1, 75),
+       (2, 120000, 1, 76),
+       (3, 127000, 1, 77),
+       (4, 123000, 1, 78),
+       (5, 123400, 1, 79),
+       (8, 140000, 1, 80),
+       (9, 190000, 1, 81),
+       (10, 130000, 1, 82),
+       (12, 190800, 1, 83),
+       (13, 100000, 1, 84),
+       (14, 120000, 1, 85),
+       (15, 127000, 1, 86),
+       (16, 123000, 1, 87),
+       (17, 123400, 1, 88),
+       (18, 140000, 1, 89),
+       (19, 190000, 1, 90),
+       (20, 130000, 1, 91),
+       (21, 190800, 1, 92),
+       (34, 100000, 1, 93),
+       (35, 120000, 1, 94),
+       (36, 127000, 1, 95),
+       (37, 123000, 1, 96),
+       (38, 123400, 1, 97),
+       (39, 140000, 1, 98),
+       (40, 190000, 1, 99),
+       (41, 130000, 1, 100),
+       (42, 190800, 1, 101),
+       (43, 100000, 1, 102),
+       (44, 120000, 1, 103),
+       (45, 127000, 1, 104),
+       (46, 123000, 1, 105),
+       (47, 123400, 1, 106),
+       (48, 140000, 1, 107),
+       (49, 190000, 1, 108),
+       (50, 130000, 1, 109),
+       (51, 100000, 2, 216),
+       (52, 120000, 2, 217),
+       (53, 127000, 2, 218),
+       (54, 123000, 2, 219),
+       (55, 123400, 2, 220),
+       (56, 140000, 2, 221),
+       (57, 190000, 2, 222),
+       (58, 130000, 2, 223),
+       (59, 190800, 2, 224),
+       (60, 100000, 2, 225),
+       (61, 120000, 2, 226),
+       (62, 127000, 2, 227),
+       (63, 123000, 2, 228),
+       (64, 123400, 2, 229),
+       (65, 140000, 2, 230),
+       (66, 190000, 2, 231),
+       (67, 130000, 2, 232),
+       (68, 190800, 2, 233),
+       (69, 100000, 2, 234),
+       (70, 120000, 2, 235),
+       (71, 127000, 2, 236),
+       (72, 123000, 2, 237),
+       (73, 123400, 2, 238),
+       (74, 140000, 2, 239),
+       (75, 190000, 2, 240),
+       (76, 130000, 2, 241),
+       (77, 190800, 2, 242),
+       (78, 100000, 2, 243),
+       (79, 120000, 2, 244),
+       (80, 127000, 2, 245),
+       (81, 123000, 2, 246),
+       (82, 123400, 2, 247),
+       (83, 140000, 2, 248),
+       (84, 190000, 2, 249),
+       (85, 130000, 2, 250),
+       (86, 100000, 3, 181),
+       (87, 120000, 3, 182),
+       (88, 127000, 3, 183),
+       (89, 123000, 3, 184),
+       (90, 123400, 3, 185),
+       (91, 140000, 3, 186),
+       (92, 190000, 3, 187),
+       (93, 130000, 3, 188),
+       (94, 190800, 3, 189),
+       (95, 100000, 3, 190),
+       (96, 120000, 3, 191),
+       (97, 127000, 3, 192),
+       (98, 123000, 3, 193),
+       (99, 123400, 3, 194),
+       (100, 140000, 3, 195),
+       (101, 190000, 3, 196),
+       (102, 130000, 3, 197),
+       (103, 190800, 3, 198),
+       (104, 100000, 3, 199),
+       (105, 120000, 3, 200),
+       (106, 127000, 3, 201),
+       (107, 123000, 3, 202),
+       (108, 123400, 3, 203),
+       (109, 140000, 3, 204),
+       (110, 190000, 3, 205),
+       (111, 130000, 3, 206),
+       (112, 190800, 3, 207),
+       (113, 100000, 3, 208),
+       (114, 120000, 3, 209),
+       (115, 127000, 3, 210),
+       (116, 123000, 3, 211),
+       (117, 123400, 3, 212),
+       (118, 140000, 3, 213),
+       (119, 190000, 3, 214),
+       (120, 130000, 3, 215),
+       (123, 100000, 4, 110),
+       (124, 120000, 4, 111),
+       (125, 127000, 4, 112),
+       (126, 123000, 4, 113),
+       (127, 123400, 4, 114),
+       (128, 140000, 4, 115),
+       (129, 190000, 4, 116),
+       (130, 130000, 4, 117),
+       (131, 190800, 4, 118),
+       (132, 100000, 4, 119),
+       (133, 120000, 4, 120),
+       (134, 127000, 4, 121),
+       (135, 123000, 4, 122),
+       (136, 123400, 4, 123),
+       (137, 140000, 4, 124),
+       (138, 190000, 4, 125),
+       (139, 130000, 4, 126),
+       (140, 190800, 4, 127),
+       (141, 100000, 4, 128),
+       (142, 120000, 4, 129),
+       (143, 127000, 4, 130),
+       (144, 123000, 4, 131),
+       (145, 123400, 4, 132),
+       (146, 140000, 4, 133),
+       (147, 190000, 4, 134),
+       (148, 130000, 4, 136),
+       (149, 190800, 4, 137),
+       (150, 100000, 4, 138),
+       (151, 120000, 4, 139),
+       (152, 127000, 4, 140),
+       (153, 123000, 4, 141),
+       (154, 123400, 4, 142),
+       (155, 140000, 4, 143),
+       (156, 190000, 4, 145),
+       (158, 100000, 5, 41),
+       (159, 120000, 5, 42),
+       (160, 127000, 5, 43),
+       (161, 123000, 5, 44),
+       (162, 123400, 5, 45),
+       (163, 140000, 5, 46),
+       (164, 190000, 5, 47),
+       (165, 130000, 5, 48),
+       (166, 190800, 5, 49),
+       (167, 100000, 5, 50),
+       (168, 120000, 5, 51),
+       (169, 127000, 5, 52),
+       (170, 123000, 5, 53),
+       (171, 123400, 5, 54),
+       (172, 140000, 5, 55),
+       (173, 190000, 5, 56),
+       (174, 130000, 5, 57),
+       (175, 190800, 5, 58),
+       (176, 100000, 5, 59),
+       (177, 120000, 5, 60),
+       (178, 127000, 5, 61),
+       (179, 123000, 5, 62),
+       (180, 123400, 5, 63),
+       (181, 140000, 5, 64),
+       (182, 190000, 5, 65),
+       (183, 130000, 5, 66),
+       (184, 190800, 5, 67),
+       (185, 100000, 5, 68),
+       (186, 120000, 5, 69),
+       (187, 127000, 5, 70),
+       (188, 123000, 5, 71),
+       (189, 123400, 5, 72),
+       (190, 140000, 5, 73),
+       (191, 190000, 5, 74),
+       (192, 130000, 5, 75),
+       (193, 100000, 6, 1),
+       (194, 120000, 6, 2),
+       (195, 127000, 6, 3),
+       (196, 123000, 6, 4),
+       (197, 123400, 6, 5),
+       (198, 140000, 6, 6),
+       (199, 190000, 6, 7),
+       (200, 130000, 6, 8),
+       (201, 190800, 6, 9),
+       (202, 100000, 6, 10),
+       (203, 120000, 6, 11),
+       (204, 127000, 6, 12),
+       (205, 123000, 6, 13),
+       (206, 123400, 6, 14),
+       (207, 140000, 6, 15),
+       (208, 190000, 6, 16),
+       (209, 130000, 6, 17),
+       (210, 190800, 6, 18),
+       (211, 100000, 6, 19),
+       (212, 120000, 6, 20),
+       (213, 127000, 6, 21),
+       (214, 123000, 6, 22),
+       (215, 123400, 6, 23),
+       (216, 140000, 6, 24),
+       (217, 190000, 6, 25),
+       (218, 130000, 6, 26),
+       (219, 190800, 6, 27),
+       (220, 100000, 6, 28),
+       (221, 120000, 6, 29),
+       (222, 127000, 6, 30),
+       (223, 123000, 6, 31),
+       (224, 123400, 6, 32),
+       (225, 140000, 6, 33),
+       (226, 190000, 6, 34),
+       (227, 130000, 6, 35);
 
 -- --------------------------------------------------------
 
@@ -1155,36 +2035,37 @@ CREATE TABLE `user`
 
 INSERT INTO `user` (`user_id`, `firstName`, `secondName`, `email`, `nic`, `passport_id`, `BirthDay`, `user_type`,
                     `number_of_bookings`)
-VALUES (1, 'siri', 'madusanka', 'siri@gmail.com', '123456789v', '123456789', '2019-01-08', '', 0),
-       (2, 'shashi', 'mal', 'shashi@gamil.com', '223456789v', '223456789', '2019-12-13', '', 0),
-       (3, 'jayan', 'pathi', 'jayan@gmail.com', '323456789v', '323456789', '2019-12-10', '', 0),
-       (4, 'kushan', 'chami', 'kushan@gmail.com', '423456789v', '423456789', '0000-00-00', '', 0),
-       (5, 'amal', 'perara', 'amal@gmail.com', '523456789v', '523456789', '0000-00-00', '', 0),
-       (6, 'kamal', 'srimal', 'kamal@gmail.com', NULL, '623456789', '0000-00-00', '', 0),
-       (7, 'nimal', 'malindu', 'nimal@gmail.com', '723456789v', '723456789', '0000-00-00', '', 0),
-       (8, 'shaluka', 'heshan', 'shaluka@gmail.com', '823456789v', '823456789', '0000-00-00', '', 0),
-       (9, 'anuradha', 'sirimewan', 'anuradha@gmail.com', '923456789v', '923456789', '0000-00-00', '', 0),
-       (10, 'misse', 'kumara', 'misse@gmail.com', '000000001v', '000000001', '0000-00-00', '', 0),
-       (11, 'hiruna', 'kumara', 'hiruna@gmail.com', '000000002v', '000000002', '0000-00-00', '', 0),
-       (12, 'kashyapa', 'nilame', 'kashyapa@gmail.com', '000000003v', '000000003', '0000-00-00', '', 0),
-       (13, 'hemaka', 'siya', 'hemaka@gmail.com', '000000004v', '000000004', '0000-00-00', '', 0),
-       (14, 'hashan', 'madda', 'hashan@gmail.com', '000000005v', '000000005', '0000-00-00', '', 0),
-       (15, 'sanju', 'chikala', 'sanju@gmail.com', NULL, '000000006', '0000-00-00', '', 0),
-       (16, 'pasindu', 'akaya', 'pasindu@gmail.com', '000000007v', '000000007', '0000-00-00', '', 0),
-       (17, 'basuru', 'pata', 'basuru@gmail.com', NULL, '000000008', '0000-00-00', '', 0),
-       (15123, 'string', 'string', 'stringfjtyg', 'string', 'string', '2010-09-08', 'bug', 0),
-       (29893, 'string', 'string', 'jtytgjytg', 'string', 'string', '2019-03-02', 'bug', 0),
-       (45269, 'string', 'string', 'strjtygjtyging', 'string', 'string', '2019-08-23', 'bug', 0),
-       (59916, 'string', 'string', 'htrhfgbgfvb', 'string', 'string', '2010-09-08', 'bug', 0),
-       (82289, 'string', 'string', 'stringbfdhbfgbgfb', 'string', 'string', '2019-03-02', 'bug', 0),
-       (97559, 'string', 'string', 'stringgfdbfgbf', 'string', 'string', '2010-09-08', 'bug', 0),
+VALUES (1, 'siri', 'madusanka', 'siri@gmail.com', '123456789v', '123456789', '1969-01-08', 'Frequent', 2),
+       (2, 'shashi', 'mal', 'shashi@gamil.com', '223456789v', '223456789', '1969-01-08', 'Frequent', 2),
+       (3, 'jaya', 'pathi', 'jaya@gmail.com', '323456789v', '323456789', '2009-12-10', 'Frequent', 2),
+       (4, 'kushan', 'chami', 'kushan@gmail.com', '423456789v', '423456789', '1969-01-08', 'Frequent', 1),
+       (5, 'amal', 'perara', 'amal@gmail.com', '523456789v', '523456789', '1969-01-08', 'Frequent', 3),
+       (6, 'kamal', 'srimal', 'kamal@gmail.com', NULL, '623456789', '2009-12-10', 'Frequent', 1),
+       (7, 'nimal', 'malindu', 'nimal@gmail.com', '723456789v', '723456789', '1969-01-08', '', 0),
+       (8, 'shaluka', 'heshan', 'shaluka@gmail.com', '823456789v', '823456789', '2009-12-10', 'Frequent', 1),
+       (9, 'anuradha', 'sirimewan', 'anuradha@gmail.com', '923456789v', '923456789', '1969-01-08', 'Frequent', 0),
+       (10, 'misse', 'kumara', 'misse@gmail.com', '000000001v', '000000001', '2009-12-10', 'Frequent', 1),
+       (11, 'hiruna', 'kumara', 'hiruna@gmail.com', '000000002v', '000000002', '1969-01-08', 'Frequent', 0),
+       (12, 'kashyapa', 'nilame', 'kashyapa@gmail.com', '000000003v', '000000003', '2009-12-10', 'Frequent', 0),
+       (13, 'hemaka', 'siya', 'hemaka@gmail.com', '000000004v', '000000004', '1969-01-08', 'Gold', 1),
+       (14, 'hashan', 'madda', 'hashan@gmail.com', '000000005v', '000000005', '2009-12-10', 'Frequent', 1),
+       (15, 'sanju', 'chikala', 'sanju@gmail.com', NULL, '000000006', '1969-01-08', 'Frequent', 0),
+       (16, 'pasindu', 'akaya', 'pasindu@gmail.com', '000000007v', '000000007', '1969-01-08', 'Gold', 0),
+       (17, 'basuru', 'pata', 'basuru@gmail.com', NULL, '000000008', '2009-12-10', 'Gold', 0),
+       (15123, 'string', 'string', 'stringfjtyg', 'string', 'string', '2010-09-08', 'Gold', 0),
+       (29893, 'string', 'string', 'jtytgjytg', 'string', 'string', '2019-03-02', 'Gold', 0),
+       (45269, 'string', 'string', 'strjtygjtyging', 'string', 'string', '2019-08-23', 'Gold', 0),
+       (59916, 'string', 'string', 'htrhfgbgfvb', 'string', 'string', '2010-09-08', 'Gold', 0),
+       (82289, 'string', 'string', 'stringbfdhbfgbgfb', 'string', 'string', '2019-03-02', '', 0),
+       (97559, 'string', 'string', 'stringgfdbfgbf', 'string', 'string', '2010-09-08', 'Gold', 0),
        (234353, 'dsfc', 'sdfcds', 'fcdsvfmujkmm', 'dsfv', 'dsfv', '2019-08-09', '', 0),
-       (272995019, 'string', 'string', 'stringdscdscsdcx', 'string', 'string', '2019-08-23', '', 0),
-       (435029035, 'string', 'string', 'stringxsaxsax', 'string', 'string', '2019-08-23', '', 0),
-       (483291754, 'string', 'string', 'stringsdwdff', 'string', 'string', '2019-08-23', '', 0),
+       (203018270, 'abc', 'abc', 'abc@gmail.com', 'string', 'string', '2019-12-31', 'Gold', 6),
+       (272995019, 'string', 'string', 'stringdscdscsdcx', 'string', 'string', '2019-08-23', 'Gold', 0),
+       (435029035, 'string', 'string', 'stringxsaxsax', 'string', 'string', '2019-08-23', 'Gold', 0),
+       (483291754, 'string', 'string', 'stringsdwdff', 'string', 'string', '2019-08-23', 'Gold', 0),
        (559653779, 'string', 'string', 'stringdweffgvfb', 'string', 'string', '2019-08-23', '', 0),
-       (602507817, 'string', 'string', 'stringfrgrtgg', 'string', 'string', '2019-08-23', '', 0),
-       (613604230, 'string', 'string', 'stringgrtgtbffdg', 'string', 'string', '2019-08-23', '', 0),
+       (602507817, 'string', 'string', 'stringfrgrtgg', 'string', 'string', '2019-08-23', 'Gold', 0),
+       (613604230, 'string', 'string', 'stringgrtgtbffdg', 'string', 'string', '2019-08-23', 'Gold', 0),
        (876401798, 'string', 'string', 'stringtregfdcvdfbc', 'string', 'string', '2019-08-23', '', 0);
 
 -- --------------------------------------------------------
@@ -1305,21 +2186,20 @@ from ((select `schedule`.`schedule_id`       AS `schedule_id`,
 DROP TABLE IF EXISTS `seat_details_according_to_schedule`;
 
 CREATE ALGORITHM = UNDEFINED DEFINER =`root`@`localhost` SQL SECURITY DEFINER VIEW `seat_details_according_to_schedule` AS
-select `a`.`schedule_id`    AS `schedule_id`,
-       `a`.`seat_id`        AS `seat_id`,
-       `a`.`seat_name`      AS `seat_name`,
-       `a`.`seat_class`     AS `seat_class`,
-       `a`.`flight_id`      AS `flight_id`,
-       `seat_price`.`price` AS `seat_price`
+select `a`.`schedule_id`  AS `schedule_id`,
+       `a`.`flight_id`    AS `flight_id`,
+       `a`.`price`        AS `price`,
+       `a`.`seat_id`      AS `seat_id`,
+       `seat`.`class`     AS `class`,
+       `seat`.`seat_name` AS `seat_name`,
+       `seat`.`model_id`  AS `model_id`
 from ((select `schedule`.`schedule_id` AS `schedule_id`,
-              `seat`.`seat_id`         AS `seat_id`,
-              `seat`.`seat_name`       AS `seat_name`,
-              `seat`.`class`           AS `seat_class`,
-              `flight`.`flight_id`     AS `flight_id`
-       from (((`schedule` join `flight` on (`schedule`.`flight_id` = `flight`.`flight_id`)) join `airplane` on (`flight`.`airplane_id` = `airplane`.`airplane_id`))
-                join `seat` on (`airplane`.`model_id` = `seat`.`model_id`))) `a`
-         left join `seat_price`
-                   on (`a`.`flight_id` = `seat_price`.`flight_id` and `a`.`seat_id` = `seat_price`.`seat_id`));
+              `schedule`.`flight_id`   AS `flight_id`,
+              `seat_price`.`price`     AS `price`,
+              `seat_price`.`seat_id`   AS `seat_id`
+       from (`schedule`
+                join `seat_price` on (`schedule`.`flight_id` = `seat_price`.`flight_id`))) `a`
+         join `seat` on (`a`.`seat_id` = `seat`.`seat_id`));
 
 --
 -- Indexes for dumped tables
@@ -1329,7 +2209,8 @@ from ((select `schedule`.`schedule_id` AS `schedule_id`,
 -- Indexes for table `admin`
 --
 ALTER TABLE `admin`
-    ADD PRIMARY KEY (`admin_id`);
+    ADD PRIMARY KEY (`admin_id`),
+    ADD UNIQUE KEY `email` (`email`);
 
 --
 -- Indexes for table `airplane`
@@ -1342,7 +2223,8 @@ ALTER TABLE `airplane`
 -- Indexes for table `airplane_model`
 --
 ALTER TABLE `airplane_model`
-    ADD PRIMARY KEY (`model_id`);
+    ADD PRIMARY KEY (`model_id`),
+    ADD KEY `model_name` (`model_name`);
 
 --
 -- Indexes for table `airport`
@@ -1350,14 +2232,15 @@ ALTER TABLE `airplane_model`
 ALTER TABLE `airport`
     ADD PRIMARY KEY (`airport_id`),
     ADD UNIQUE KEY `location_id_2` (`location_id`, `code`),
-    ADD KEY `location_id` (`location_id`);
+    ADD KEY `location_id` (`location_id`),
+    ADD KEY `code` (`code`);
 
 --
 -- Indexes for table `book`
 --
 ALTER TABLE `book`
     ADD PRIMARY KEY (`id`),
-    ADD UNIQUE KEY `schedule_id_2` (`schedule_id`, `seat_id`, `user_id`),
+    ADD UNIQUE KEY `schedule_id_2` (`schedule_id`, `seat_id`),
     ADD KEY `schedule_id` (`schedule_id`),
     ADD KEY `seat_id` (`seat_id`),
     ADD KEY `user_id` (`user_id`);
@@ -1405,6 +2288,14 @@ ALTER TABLE `location_name`
     ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `passenger`
+--
+ALTER TABLE `passenger`
+    ADD PRIMARY KEY (`id`),
+    ADD KEY `book_id` (`book_id`),
+    ADD KEY `id` (`id`);
+
+--
 -- Indexes for table `pilot`
 --
 ALTER TABLE `pilot`
@@ -1414,6 +2305,7 @@ ALTER TABLE `pilot`
 -- Indexes for table `registered_user`
 --
 ALTER TABLE `registered_user`
+    ADD UNIQUE KEY `user_id_2` (`user_id`),
     ADD KEY `user_id` (`user_id`);
 
 --
@@ -1431,14 +2323,16 @@ ALTER TABLE `route`
 ALTER TABLE `schedule`
     ADD PRIMARY KEY (`schedule_id`),
     ADD KEY `flight_id` (`flight_id`),
-    ADD KEY `gate_id` (`gate_id`);
+    ADD KEY `gate_id` (`gate_id`),
+    ADD KEY `dep_time` (`dep_time`),
+    ADD KEY `arival_time` (`arival_time`);
 
 --
 -- Indexes for table `seat`
 --
 ALTER TABLE `seat`
     ADD PRIMARY KEY (`seat_id`),
-    ADD UNIQUE KEY `seat_name` (`seat_name`);
+    ADD UNIQUE KEY `seat_UN` (`model_id`, `seat_name`);
 
 --
 -- Indexes for table `seat_price`
@@ -1478,14 +2372,15 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-    MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT;
+    MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT,
+    AUTO_INCREMENT = 2;
 
 --
 -- AUTO_INCREMENT for table `airplane`
 --
 ALTER TABLE `airplane`
     MODIFY `airplane_id` int(10) NOT NULL AUTO_INCREMENT,
-    AUTO_INCREMENT = 12;
+    AUTO_INCREMENT = 14;
 
 --
 -- AUTO_INCREMENT for table `airport`
@@ -1499,21 +2394,28 @@ ALTER TABLE `airport`
 --
 ALTER TABLE `book`
     MODIFY `id` int(10) NOT NULL AUTO_INCREMENT,
-    AUTO_INCREMENT = 35;
+    AUTO_INCREMENT = 98505716;
 
 --
 -- AUTO_INCREMENT for table `flight`
 --
 ALTER TABLE `flight`
     MODIFY `flight_id` int(10) NOT NULL AUTO_INCREMENT,
-    AUTO_INCREMENT = 9;
+    AUTO_INCREMENT = 7;
 
 --
 -- AUTO_INCREMENT for table `gate`
 --
 ALTER TABLE `gate`
     MODIFY `gate_id` int(10) NOT NULL AUTO_INCREMENT,
-    AUTO_INCREMENT = 10;
+    AUTO_INCREMENT = 40;
+
+--
+-- AUTO_INCREMENT for table `passenger`
+--
+ALTER TABLE `passenger`
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,
+    AUTO_INCREMENT = 5;
 
 --
 -- AUTO_INCREMENT for table `route`
@@ -1527,14 +2429,21 @@ ALTER TABLE `route`
 --
 ALTER TABLE `schedule`
     MODIFY `schedule_id` int(10) NOT NULL AUTO_INCREMENT,
-    AUTO_INCREMENT = 4;
+    AUTO_INCREMENT = 11;
+
+--
+-- AUTO_INCREMENT for table `seat`
+--
+ALTER TABLE `seat`
+    MODIFY `seat_id` int(10) NOT NULL AUTO_INCREMENT,
+    AUTO_INCREMENT = 462;
 
 --
 -- AUTO_INCREMENT for table `seat_price`
 --
 ALTER TABLE `seat_price`
     MODIFY `price_id` int(10) NOT NULL AUTO_INCREMENT,
-    AUTO_INCREMENT = 25;
+    AUTO_INCREMENT = 228;
 
 --
 -- AUTO_INCREMENT for table `staff`
@@ -1576,8 +2485,8 @@ ALTER TABLE `airport`
 --
 ALTER TABLE `book`
     ADD CONSTRAINT `book_ibfk_1` FOREIGN KEY (`schedule_id`) REFERENCES `schedule` (`schedule_id`),
-    ADD CONSTRAINT `book_ibfk_2` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`),
-    ADD CONSTRAINT `book_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+    ADD CONSTRAINT `book_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+    ADD CONSTRAINT `book_ibfk_4` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`);
 
 --
 -- Constraints for table `cabin_crew`
@@ -1613,6 +2522,12 @@ ALTER TABLE `location`
     ADD CONSTRAINT `location_ibfk_4` FOREIGN KEY (`location_id`) REFERENCES `location_name` (`id`);
 
 --
+-- Constraints for table `passenger`
+--
+ALTER TABLE `passenger`
+    ADD CONSTRAINT `passenger_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`);
+
+--
 -- Constraints for table `pilot`
 --
 ALTER TABLE `pilot`
@@ -1642,8 +2557,8 @@ ALTER TABLE `schedule`
 -- Constraints for table `seat_price`
 --
 ALTER TABLE `seat_price`
-    ADD CONSTRAINT `seat_price_ibfk_2` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`),
-    ADD CONSTRAINT `seat_price_ibfk_3` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`flight_id`);
+    ADD CONSTRAINT `seat_price_ibfk_3` FOREIGN KEY (`flight_id`) REFERENCES `flight` (`flight_id`),
+    ADD CONSTRAINT `seat_price_ibfk_4` FOREIGN KEY (`seat_id`) REFERENCES `seat` (`seat_id`);
 
 --
 -- Constraints for table `staff_flight`
