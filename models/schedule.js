@@ -53,6 +53,8 @@ Schedule.prototype.createNewSchedule = async function (date, flight_id, dep_time
         } catch (e) {
             if (e.sqlState === 23000) {
                 reject(new ErrorHandler(404, "Invalid arguments"));
+            } else if (e.sqlState === 45001) {
+                reject(new ErrorHandler(400, "Conflict same flight in same dep,arri time"));
             } else {
                 logger.log(e);
                 console.log(e);
