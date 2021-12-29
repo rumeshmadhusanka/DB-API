@@ -4,6 +4,9 @@ Swagger REST API:<br>
 ![logo](images/swagger1.png) 
 <br>
 ![logo](images/grafana.png)
+<br>
+The modified ER diagram:<br>
+![db](https://user-images.githubusercontent.com/32504465/147670388-060b60e2-4769-468d-a2f8-1f6118ab6a2e.png)
 
 ## MySQL
 * Triggers
