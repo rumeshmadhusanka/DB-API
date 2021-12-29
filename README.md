@@ -1,7 +1,9 @@
 # Airline Reservation System REST API
+Completed for the Database Systems module<br>
+Swagger REST API:<br>
 ![logo](images/swagger1.png) | ![logo](images/grafana.png)
 
-## Features
+## MySQL
 * Triggers
 * Functions
 * Views
@@ -9,29 +11,18 @@
 * Indexing 
 * Using transactions where necessary
 
-
+## The API
 * Node Express REST api
 * Using promises
-* Documentation with `Swagger`(Open API 2.0)
+* API Documentation with `Swagger`(Open API 2.0)
 * Centralized error handling
-* Passwords hashed using `bcrypt`
+* Passwords hashing using `bcrypt`
 * Authentication with jwt
 * User input validation using `hapi/joi`
 * Uses `promise-mysql` and connection pooling
 * Load balancing using `pm2` process management
-* Using `Docker`
-* MIT license
 * `Grafana` for Realtime Report generation 
 
-## Prerequisites
-- pm2 ```> npm i pm2 -g```
-
-- nodemon ```> npm i nodemon -g```
-
-## Install
-```
-> npm install 
-```
 
 ## Quick Start
 
@@ -44,7 +35,20 @@
 - Install [Grafana](https://grafana.com/) and import the dashboards
 
 
-## Authors
+## Install the dependencies
+```
+> npm install 
+```
+
+## Run in development
+- Use nodemon ```npm i nodemon -g```
+
+## Deploy
+- Use pm2 ```npm i pm2 -g```
+
+
+
+## Collaborators
 
 - [Rumesh Madhusanka](https://github.com/rumeshmadhusanka)
 
