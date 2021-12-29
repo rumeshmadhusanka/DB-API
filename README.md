@@ -43,10 +43,10 @@ Swagger REST API:<br>
 ```
 
 ## Run in development
-- Use nodemon ```npm i nodemon -g```
+- Uses nodemon ```npm dev```
 
 ## Deploy
-- Use pm2 ```npm i pm2 -g```
+- Uses pm2 ```npm start```
 
 
 
