@@ -39,16 +39,21 @@ Swagger REST API:<br>
 
 ## Install the dependencies
 ```
-> npm install 
+npm install 
 ```
 
 ## Run in development
-- Uses nodemon ```npm dev```
+Uses nodemon 
+```
+npm dev
+```
 
 ## Deploy
-- Uses pm2 ```npm start```
+Uses pm2 
+```
+npm start
 
-
+```
 
 ## Collaborators
 
