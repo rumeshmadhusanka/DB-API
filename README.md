@@ -1,7 +1,9 @@
 # Airline Reservation System REST API
 Completed for the Database Systems module<br>
 Swagger REST API:<br>
-![logo](images/swagger1.png) | ![logo](images/grafana.png)
+![logo](images/swagger1.png) 
+<br>
+![logo](images/grafana.png)
 
 ## MySQL
 * Triggers
