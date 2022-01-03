@@ -6,7 +6,8 @@ Swagger REST API:<br>
 ![logo](images/grafana.png)
 <br>
 The modified ER diagram:<br>
-![db](https://user-images.githubusercontent.com/32504465/147670388-060b60e2-4769-468d-a2f8-1f6118ab6a2e.png)
+![db](https://user-images.githubusercontent.com/32504465/147917752-66ead0f4-8692-4d74-97a6-a1d3e9514ab7.png)
+
 
 ## MySQL
 * Triggers
